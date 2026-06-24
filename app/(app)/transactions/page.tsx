@@ -53,13 +53,19 @@ export default function TransactionsPage() {
       >
         <Plus size={24} />
       </button>
-      {showModal && wallets.length > 0 && (
-        <TransactionModal
-          open={showModal}
-          onClose={() => setShowModal(false)}
-          onSave={handleSave}
-          wallets={wallets}
-        />
+      {showModal && (
+        wallets.length > 0 ? (
+          <TransactionModal
+            open={showModal}
+            onClose={() => setShowModal(false)}
+            onSave={handleSave}
+            wallets={wallets}
+          />
+        ) : (
+          <p className="fixed bottom-32 left-1/2 -translate-x-1/2 bg-surface text-sm px-4 py-2 rounded-full border border-white/10">
+            Add a wallet first in Settings
+          </p>
+        )
       )}
     </div>
   )

@@ -31,23 +31,26 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
   async function handleSave() {
     if (!amount || !categoryId || !walletId) return
     setSaving(true)
-    const convertedAmount = exchangeRate ? Math.round(amount * exchangeRate) : amount
-    const res = await fetch('/api/transactions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        walletId, categoryId, type, amount, currency,
-        exchangeRate, convertedAmount,
-        date: new Date(date).toISOString(),
-        note: note || null, photos: [], withPeople: [],
-      }),
-    })
-    if (res.ok) {
-      const tx = await res.json()
-      onSave(tx)
-      onClose()
+    try {
+      const convertedAmount = exchangeRate ? Math.round(amount * exchangeRate) : amount
+      const res = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          walletId, categoryId, type, amount, currency,
+          exchangeRate, convertedAmount,
+          date: new Date(date).toISOString(),
+          note: note || null, photos: [], withPeople: [],
+        }),
+      })
+      if (res.ok) {
+        const tx = await res.json()
+        onSave(tx)
+        onClose()
+      }
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   return (
