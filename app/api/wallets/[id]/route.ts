@@ -1,6 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { z } from 'zod'
+
+const updateSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  icon: z.string().optional(),
+  color: z.string().optional(),
+  archived: z.boolean().optional(),
+  excludeFromTotal: z.boolean().optional(),
+})
 
 export const dynamic = 'force-dynamic'
 
@@ -35,20 +44,12 @@ export async function PATCH(
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
   const body = await request.json()
-  const { name, icon, color, currency, type, excludeFromTotal, archived, sortOrder } = body
+  const parsed = updateSchema.safeParse(body)
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   const wallet = await prisma.wallet.update({
     where: { id },
-    data: {
-      ...(name !== undefined && { name }),
-      ...(icon !== undefined && { icon }),
-      ...(color !== undefined && { color }),
-      ...(currency !== undefined && { currency }),
-      ...(type !== undefined && { type }),
-      ...(excludeFromTotal !== undefined && { excludeFromTotal }),
-      ...(archived !== undefined && { archived }),
-      ...(sortOrder !== undefined && { sortOrder }),
-    },
+    data: parsed.data,
   })
 
   return NextResponse.json(wallet)

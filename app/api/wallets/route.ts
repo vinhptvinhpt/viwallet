@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server'
 import { getUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { z } from 'zod'
 
-export const dynamic = 'force-dynamic'
+const walletSchema = z.object({
+  name: z.string().min(1).max(50),
+  icon: z.string().default('wallet'),
+  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/).default('#2563EB'),
+  currency: z.string().length(3),
+  initialBalance: z.number().int().default(0),
+  type: z.enum(['CASH', 'CARD', 'BANK', 'EWALLET']).default('CASH'),
+  excludeFromTotal: z.boolean().default(false),
+})
 
 export async function GET() {
   const user = await getUser()
@@ -12,7 +21,6 @@ export async function GET() {
     where: { userId: user.id, archived: false },
     orderBy: { sortOrder: 'asc' },
   })
-
   return NextResponse.json(wallets)
 }
 
@@ -21,27 +29,15 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { name, icon, color, currency, initialBalance, type, excludeFromTotal } = body
-
-  if (!name || !currency) {
-    return NextResponse.json({ error: 'name and currency are required' }, { status: 400 })
-  }
-
-  const balanceCents = typeof initialBalance === 'number' ? initialBalance : 0
+  const parsed = walletSchema.safeParse(body)
+  if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
 
   const wallet = await prisma.wallet.create({
     data: {
+      ...parsed.data,
+      currentBalance: parsed.data.initialBalance,
       userId: user.id,
-      name,
-      icon: icon ?? 'wallet',
-      color: color ?? '#2563EB',
-      currency,
-      initialBalance: balanceCents,
-      currentBalance: balanceCents,
-      type: type ?? 'CASH',
-      excludeFromTotal: excludeFromTotal ?? false,
     },
   })
-
   return NextResponse.json(wallet, { status: 201 })
 }
