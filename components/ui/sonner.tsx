@@ -1,3 +1,7 @@
+// Toast standard: this project uses Sonner (not shadcn/ui toast).
+// Import toast from 'sonner' directly: import { toast } from 'sonner'
+// Usage: toast.success('Saved!') / toast.error('Something went wrong')
+// The <Toaster /> component is mounted in app/layout.tsx.
 "use client"
 
 import { useTheme } from "next-themes"
