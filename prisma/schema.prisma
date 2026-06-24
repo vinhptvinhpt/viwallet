@@ -1,0 +1,175 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String        @id @default(uuid())
+  email         String        @unique
+  name          String?
+  avatarUrl     String?
+  baseCurrency  String        @default("USD")
+  locale        String        @default("en-US")
+  createdAt     DateTime      @default(now())
+  wallets       Wallet[]
+  categories    Category[]
+  transactions  Transaction[]
+  budgets       Budget[]
+  trips         Trip[]
+  recurringRules RecurringRule[]
+}
+
+model Wallet {
+  id               String        @id @default(uuid())
+  userId           String
+  name             String
+  icon             String        @default("wallet")
+  color            String        @default("#2563EB")
+  currency         String
+  initialBalance   Int           @default(0)
+  currentBalance   Int           @default(0)
+  type             WalletType    @default(CASH)
+  excludeFromTotal Boolean       @default(false)
+  archived         Boolean       @default(false)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+}
+
+enum WalletType {
+  CASH
+  CARD
+  BANK
+  EWALLET
+}
+
+model Category {
+  id               String        @id @default(uuid())
+  userId           String?
+  name             String
+  icon             String
+  color            String        @default("#94A3B8")
+  type             CategoryType
+  parentCategoryId String?
+  sortOrder        Int           @default(0)
+  user             User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentCategory   Category?     @relation("SubCategories", fields: [parentCategoryId], references: [id])
+  subCategories    Category[]    @relation("SubCategories")
+  transactions     Transaction[]
+  budgets          Budget[]
+}
+
+enum CategoryType {
+  EXPENSE
+  INCOME
+}
+
+model Transaction {
+  id                String          @id @default(uuid())
+  userId            String
+  walletId          String
+  categoryId        String
+  tripId            String?
+  type              TransactionType @default(EXPENSE)
+  amount            Int
+  currency          String
+  exchangeRate      Decimal?        @db.Decimal(18, 8)
+  convertedAmount   Int
+  date              DateTime
+  note              String?
+  photos            String[]
+  withPeople        String[]
+  location          String?
+  isRecurring       Boolean         @default(false)
+  recurringRuleId   String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wallet            Wallet          @relation(fields: [walletId], references: [id])
+  category          Category        @relation(fields: [categoryId], references: [id])
+  trip              Trip?           @relation(fields: [tripId], references: [id])
+  recurringRule     RecurringRule?  @relation(fields: [recurringRuleId], references: [id])
+}
+
+enum TransactionType {
+  EXPENSE
+  INCOME
+  TRANSFER
+  DEBT_LOAN
+}
+
+model Budget {
+  id             String       @id @default(uuid())
+  userId         String
+  name           String
+  type           BudgetType
+  amount         Int
+  currency       String
+  categoryId     String?
+  period         BudgetPeriod @default(MONTHLY)
+  startDate      DateTime
+  endDate        DateTime?
+  rollover       Boolean      @default(false)
+  alertThreshold Int          @default(80)
+  createdAt      DateTime     @default(now())
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       Category?    @relation(fields: [categoryId], references: [id])
+}
+
+enum BudgetType {
+  ENVELOPE
+  LIMIT
+}
+
+enum BudgetPeriod {
+  WEEKLY
+  MONTHLY
+  YEARLY
+  CUSTOM
+}
+
+model Trip {
+  id            String        @id @default(uuid())
+  userId        String
+  name          String
+  coverImage    String?
+  baseCurrency  String
+  startDate     DateTime
+  endDate       DateTime?
+  budgetAmount  Int?
+  people        String[]
+  createdAt     DateTime      @default(now())
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+}
+
+model RecurringRule {
+  id             String             @id @default(uuid())
+  userId         String
+  template       Json
+  frequency      RecurringFrequency
+  nextDueDate    DateTime
+  endCondition   EndCondition       @default(NEVER)
+  endValue       String?
+  lastRunAt      DateTime?
+  createdAt      DateTime           @default(now())
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+}
+
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum EndCondition {
+  NEVER
+  AFTER_N
+  ON_DATE
+}
