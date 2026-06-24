@@ -50,6 +50,20 @@ export async function PATCH(
     },
   })
 
+  // Correct wallet balance if amount or type changed
+  const newAmount = parsed.data.amount ?? existing.amount
+  const newType = parsed.data.type ?? existing.type
+  const oldDelta = existing.type === 'INCOME' ? existing.amount : -existing.amount
+  const newDelta = newType === 'INCOME' ? newAmount : -newAmount
+  const balanceDiff = newDelta - oldDelta
+
+  if (balanceDiff !== 0) {
+    await prisma.wallet.update({
+      where: { id: existing.walletId },
+      data: { currentBalance: { increment: balanceDiff } },
+    })
+  }
+
   return NextResponse.json(transaction)
 }
 
