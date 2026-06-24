@@ -29,7 +29,7 @@ export async function GET(
 
   const totalSpent = trip.transactions
     .filter(t => t.type === 'EXPENSE')
-    .reduce((sum, t) => sum + t.amount, 0)
+    .reduce((sum, t) => sum + t.convertedAmount, 0)
 
   return NextResponse.json({ ...trip, totalSpent })
 }

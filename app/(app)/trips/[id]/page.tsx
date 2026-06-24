@@ -5,12 +5,14 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { TransactionRow } from '@/components/transactions/TransactionRow'
 import { formatAmount } from '@/lib/currency'
+import type { Trip, TransactionWithRelations } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
 export default function TripDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const [trip, setTrip] = useState<any>(null)
+  type TripWithTransactions = Trip & { transactions: TransactionWithRelations[]; totalSpent: number }
+  const [trip, setTrip] = useState<TripWithTransactions | null>(null)
 
   useEffect(() => {
     fetch(`/api/trips/${id}`).then(r => r.json()).then(setTrip)
@@ -32,7 +34,7 @@ export default function TripDetailPage() {
         </div>
       </div>
       <div>
-        {trip.transactions.map((tx: any) => (
+        {trip.transactions.map((tx: TransactionWithRelations) => (
           <TransactionRow key={tx.id} tx={tx} />
         ))}
         {trip.transactions.length === 0 && (
