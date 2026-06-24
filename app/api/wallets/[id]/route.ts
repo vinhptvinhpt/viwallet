@@ -67,7 +67,9 @@ export async function DELETE(
   const existing = await prisma.wallet.findFirst({ where: { id, userId: user.id } })
   if (!existing) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await prisma.wallet.delete({ where: { id } })
-
-  return new Response(null, { status: 204 })
+  await prisma.wallet.update({
+    where: { id },
+    data: { archived: true },
+  })
+  return NextResponse.json({ success: true })
 }
