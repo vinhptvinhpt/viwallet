@@ -16,13 +16,13 @@ export default function LoginPage() {
       <div className="w-full max-w-sm bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-8">
         {/* Logo / wordmark */}
         <div className="flex items-center justify-center mb-6">
-          <div className="w-12 h-12 rounded-[var(--radius-md)] bg-primary flex items-center justify-center">
+          <div className="w-12 h-12 rounded-[var(--radius-md)] bg-primary flex items-center justify-center text-white">
             <svg
               width="28"
               height="28"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="white"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"

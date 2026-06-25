@@ -60,6 +60,7 @@ export default function OnboardingFlow() {
         const data = await res.json().catch(() => ({}))
         throw new Error(data?.error ?? 'Failed to create wallet')
       }
+      router.refresh()
       router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
