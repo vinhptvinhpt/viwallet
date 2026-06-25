@@ -3,7 +3,7 @@ import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 
 export const metadata: Metadata = {
-  title: 'WalletWise',
+  title: 'ViWallet',
   description: 'Personal finance manager',
   manifest: '/manifest.json',
 }

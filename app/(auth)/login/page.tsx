@@ -15,7 +15,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-sm p-8 rounded-2xl border border-white/10 bg-surface backdrop-blur">
-        <h1 className="text-2xl font-bold text-center mb-2">WalletWise</h1>
+        <h1 className="text-2xl font-bold text-center mb-2">ViWallet</h1>
         <p className="text-slate-400 text-center text-sm mb-8">
           Smart multi-currency finance tracking
         </p>

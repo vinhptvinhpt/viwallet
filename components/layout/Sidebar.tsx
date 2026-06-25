@@ -18,7 +18,7 @@ export function Sidebar() {
   return (
     <aside className="hidden lg:flex flex-col w-60 min-h-screen bg-surface border-r border-white/10 p-4">
       <div className="mb-8 px-2">
-        <h1 className="text-xl font-bold text-white">WalletWise</h1>
+        <h1 className="text-xl font-bold text-white">ViWallet</h1>
       </div>
       <nav className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
