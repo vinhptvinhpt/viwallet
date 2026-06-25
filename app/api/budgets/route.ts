@@ -3,11 +3,19 @@ import { getUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { startOfMonth, endOfMonth } from 'date-fns'
-import type { Prisma } from '@prisma/client'
-
-type BudgetWithCategory = Prisma.BudgetGetPayload<{
-  include: { category: { select: { id: true; name: true; icon: true; color: true } } }
-}>
+type BudgetWithCategory = {
+  id: string
+  userId: string
+  name: string
+  amount: number
+  currency: string
+  period: string
+  startDate: Date
+  endDate: Date | null
+  alertThreshold: number
+  categoryId: string | null
+  category: { id: string; name: string; icon: string; color: string } | null
+}
 
 const budgetSchema = z.object({
   name: z.string().min(1).max(50),
