@@ -16,6 +16,7 @@ export default function AppearanceCard() {
         {OPTIONS.map(opt => (
           <button
             key={opt}
+            type="button"
             onClick={() => setTheme(opt)}
             className={`flex-1 py-2 rounded-[var(--radius-md)] text-sm capitalize transition-colors ${
               mounted && theme === opt ? 'bg-primary text-white' : 'bg-surface-2 text-text-secondary'
