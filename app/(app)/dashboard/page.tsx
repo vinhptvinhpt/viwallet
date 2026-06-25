@@ -7,13 +7,18 @@ import { SpendingDonut } from '@/components/reports/SpendingDonut'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import type { Wallet, BudgetWithSpent, TransactionWithRelations } from '@/types'
 
-export const dynamic = 'force-dynamic'
+interface ReportSummary {
+  totalIncome: number
+  totalExpense: number
+  byCategory?: { name: string; icon: string; color: string; amount: number }[]
+  byDay?: { date: string; income: number; expense: number }[]
+}
 
 export default function DashboardPage() {
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [budgets, setBudgets] = useState<BudgetWithSpent[]>([])
   const [transactions, setTransactions] = useState<TransactionWithRelations[]>([])
-  const [summary, setSummary] = useState<any>(null)
+  const [summary, setSummary] = useState<ReportSummary | null>(null)
   const currency = 'USD'
 
   useEffect(() => {
@@ -52,7 +57,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Spending Donut */}
-      {summary?.byCategory?.length > 0 && (
+      {summary?.byCategory && summary.byCategory.length > 0 && (
         <div className="p-4 rounded-xl bg-surface border border-white/10">
           <h2 className="text-sm font-medium text-slate-400 mb-2">This Month</h2>
           <SpendingDonut data={summary.byCategory} currency={currency} />
