@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, List, Target, Plane, BarChart2, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import ThemeToggle from '@/components/theme/ThemeToggle'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Dashboard' },
@@ -37,6 +38,9 @@ export function Sidebar() {
           </Link>
         ))}
       </nav>
+      <div className="mt-auto pt-4 px-2">
+        <ThemeToggle />
+      </div>
     </aside>
   )
 }

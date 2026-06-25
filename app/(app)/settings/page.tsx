@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Wallet, Tag } from 'lucide-react'
+import AppearanceCard from '@/components/theme/AppearanceCard'
 
 const SETTINGS_ITEMS = [
   { href: '/settings/wallets', icon: Wallet, label: 'Wallets', desc: 'Manage your wallets and accounts' },
@@ -10,6 +11,7 @@ export default function SettingsPage() {
   return (
     <div className="p-6 max-w-2xl">
       <h1 className="text-2xl font-bold mb-6">Settings</h1>
+      <AppearanceCard />
       <div className="flex flex-col gap-2">
         {SETTINGS_ITEMS.map(({ href, icon: Icon, label, desc }) => (
           <Link key={href} href={href}
