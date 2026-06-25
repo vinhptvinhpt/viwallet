@@ -40,7 +40,7 @@ export default function DashboardPage() {
 
   const netWorth = wallets
     .filter(w => !w.excludeFromTotal)
-    .reduce((sum, w) => sum + w.currentBalance, 0)
+    .reduce((sum: number, w) => sum + w.currentBalance, 0)
 
   return (
     <div className="p-6 max-w-3xl space-y-6">

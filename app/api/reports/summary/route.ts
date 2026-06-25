@@ -16,8 +16,8 @@ export async function GET(request: Request) {
     include: { category: { select: { name: true, icon: true, color: true } } },
   })
 
-  const totalIncome = transactions.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.convertedAmount, 0)
-  const totalExpense = transactions.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.convertedAmount, 0)
+  const totalIncome = transactions.filter(t => t.type === 'INCOME').reduce((s: number, t) => s + t.convertedAmount, 0)
+  const totalExpense = transactions.filter(t => t.type === 'EXPENSE').reduce((s: number, t) => s + t.convertedAmount, 0)
 
   // By category
   const catMap = new Map<string, { name: string; icon: string; color: string; amount: number }>()
