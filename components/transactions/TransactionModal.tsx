@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -27,6 +27,56 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
   const [saving, setSaving] = useState(false)
 
   const reducedMotion = useAppReducedMotion()
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // 2. Escape-to-close
+  useEffect(() => {
+    if (!open) return
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [open, onClose])
+
+  // 3. Body scroll lock
+  useEffect(() => {
+    if (!open) return
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [open])
+
+  // 4. Focus management — move focus into panel on open, trap Tab within it
+  useEffect(() => {
+    if (!open) return
+    const panel = panelRef.current
+    if (!panel) return
+    // Focus the panel itself so screen-readers announce it
+    panel.focus()
+
+    function getFocusable(): HTMLElement[] {
+      return Array.from(
+        panel!.querySelectorAll<HTMLElement>(
+          'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(el => !el.closest('[hidden]'))
+    }
+
+    function trapTab(e: KeyboardEvent) {
+      if (e.key !== 'Tab') return
+      const focusable = getFocusable()
+      if (focusable.length === 0) { e.preventDefault(); return }
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus() }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first.focus() }
+      }
+    }
+    panel.addEventListener('keydown', trapTab)
+    return () => panel.removeEventListener('keydown', trapTab)
+  }, [open])
 
   const selectedWallet = wallets.find(w => w.id === walletId)
   const showExchangeRate = selectedWallet && selectedWallet.currency !== currency
@@ -69,7 +119,12 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
             onClick={onClose}
           />
           <motion.div
-            className="fixed inset-x-0 bottom-0 z-50 bg-surface rounded-t-[var(--radius-lg)] p-5 max-h-[90vh] overflow-y-auto"
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tx-modal-title"
+            tabIndex={-1}
+            className="fixed inset-x-0 bottom-0 z-50 bg-surface rounded-t-[var(--radius-lg)] p-5 max-h-[90vh] overflow-y-auto outline-none"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -83,7 +138,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
             dragElastic={0.2}
             onDragEnd={(_, info) => { if (info.offset.y > 120) onClose() }}
           >
-            <h2 className="text-base font-semibold text-white mb-4">Add Transaction</h2>
+            <h2 id="tx-modal-title" className="text-base font-semibold text-text-primary mb-4">Add Transaction</h2>
             <div className="flex gap-2 mb-2">
               {(['EXPENSE', 'INCOME'] as const).map(t => (
                 <button key={t} onClick={() => setType(t)}
