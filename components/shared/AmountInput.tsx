@@ -27,18 +27,18 @@ export function AmountInput({ value, onChange, currency }: AmountInputProps) {
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', 'DEL']
 
   return (
-    <div>
+    <div className="bg-surface-2 rounded-[var(--radius-lg)]">
       <div className="text-center py-4">
-        <span className="text-slate-400 text-lg mr-2">{currency}</span>
-        <span className="text-4xl font-bold tabular-nums">{display || '0'}</span>
+        <span className="text-text-secondary text-lg mr-2">{currency}</span>
+        <span className="text-4xl font-extrabold tabular-nums text-text-primary">{display || '0'}</span>
       </div>
-      <div className="grid grid-cols-3 gap-1 mt-2">
+      <div className="grid grid-cols-3 gap-1 mt-2 p-2">
         {keys.map(k => (
           <button
             key={k}
             type="button"
             onClick={() => handleKey(k)}
-            className="h-14 rounded-xl bg-surface-2 text-white text-xl font-medium hover:bg-white/10 active:scale-95 transition-transform"
+            className="h-14 rounded-[var(--radius-md)] bg-surface hover:bg-primary-soft text-text-primary text-xl font-medium active:scale-95 transition-transform"
           >
             {k}
           </button>
