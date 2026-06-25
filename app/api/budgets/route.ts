@@ -3,6 +3,11 @@ import { getUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
 import { startOfMonth, endOfMonth } from 'date-fns'
+import type { Prisma } from '@prisma/client'
+
+type BudgetWithCategory = Prisma.BudgetGetPayload<{
+  include: { category: { select: { id: true; name: true; icon: true; color: true } } }
+}>
 
 const budgetSchema = z.object({
   name: z.string().min(1).max(50),
@@ -30,7 +35,7 @@ export async function GET() {
     include: { category: { select: { id: true, name: true, icon: true, color: true } } },
   })
 
-  const budgetsWithSpent = await Promise.all(budgets.map(async budget => {
+  const budgetsWithSpent = await Promise.all(budgets.map(async (budget: BudgetWithCategory) => {
     const where: any = {
       userId: user.id,
       type: 'EXPENSE',
