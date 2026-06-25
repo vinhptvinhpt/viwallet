@@ -1,4 +1,24 @@
 import { PrismaClient, CategoryType } from '@prisma/client'
+import * as fs from 'fs'
+import * as path from 'path'
+
+// Load .env before PrismaClient is instantiated
+function loadEnv() {
+  for (const file of ['.env', '.env.local']) {
+    const p = path.join(process.cwd(), file)
+    if (!fs.existsSync(p)) continue
+    for (const line of fs.readFileSync(p, 'utf-8').split('\n')) {
+      const t = line.trim()
+      if (!t || t.startsWith('#')) continue
+      const i = t.indexOf('=')
+      if (i === -1) continue
+      const k = t.slice(0, i).trim()
+      const v = t.slice(i + 1).trim()
+      if (k && !(k in process.env)) process.env[k] = v
+    }
+  }
+}
+loadEnv()
 
 const prisma = new PrismaClient()
 
