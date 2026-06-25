@@ -17,7 +17,7 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname()
   return (
-    <aside className="hidden lg:flex flex-col w-60 min-h-screen bg-surface border-r border border-hairline p-4">
+    <aside className="hidden lg:flex flex-col w-60 min-h-screen bg-surface border-r border-hairline p-4">
       <div className="mb-8 px-2">
         <h1 className="text-xl font-bold text-text-primary">ViWallet</h1>
       </div>
