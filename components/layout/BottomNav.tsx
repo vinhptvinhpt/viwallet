@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, List, Target, Plane, MoreHorizontal, Goal, CreditCard, BarChart2, Settings } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
 
@@ -23,6 +23,12 @@ const MORE_ITEMS = [
 
 function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   const reducedMotion = useAppReducedMotion()
+  const moreSheetRef = useRef<HTMLDivElement>(null)
+
+  // Focus management
+  useEffect(() => {
+    if (open) moreSheetRef.current?.focus()
+  }, [open])
 
   // Escape-to-close
   useEffect(() => {
@@ -54,10 +60,12 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
             onClick={onClose}
           />
           <motion.div
+            ref={moreSheetRef}
             role="dialog"
             aria-modal="true"
-            aria-label="More options"
-            className="fixed inset-x-0 bottom-[64px] z-50 bg-surface rounded-t-[var(--radius-lg)] p-5"
+            aria-labelledby="more-sheet-title"
+            tabIndex={-1}
+            className="fixed inset-x-0 bottom-[64px] z-50 bg-surface rounded-t-[var(--radius-lg)] p-5 outline-none"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -67,7 +75,7 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
                 : { type: 'spring', stiffness: 300, damping: 30 }
             }
           >
-            <h2 className="text-sm font-semibold text-text-secondary mb-3">More</h2>
+            <h2 id="more-sheet-title" className="text-sm font-semibold text-text-secondary mb-3">More</h2>
             <div className="grid grid-cols-4 gap-2">
               {MORE_ITEMS.map(({ href, icon: Icon, label }) => (
                 <Link

@@ -22,7 +22,7 @@ export interface GoalSummary {
 }
 
 export function GoalCard({ goal, index = 0 }: { goal: GoalSummary; index?: number }) {
-  const pct = Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
+  const pct = goal.targetAmount > 0 ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100)) : 0
   const isCompleted = goal.status === 'COMPLETED'
 
   return (

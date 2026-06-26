@@ -46,8 +46,9 @@ export default function GoalDetailPage() {
       .then(r => r.json())
       .then(data => {
         setGoal(data)
-        setLoading(false)
       })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [id])
 
   useEffect(() => {
@@ -93,7 +94,7 @@ export default function GoalDetailPage() {
     )
   }
 
-  const pct = Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100))
+  const pct = goal.targetAmount > 0 ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100)) : 0
   const isCompleted = goal.status === 'COMPLETED'
   const remaining = Math.max(0, goal.targetAmount - goal.currentAmount)
 

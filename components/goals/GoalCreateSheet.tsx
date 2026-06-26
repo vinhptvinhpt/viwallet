@@ -18,6 +18,8 @@ export function GoalCreateSheet({ open, onClose, onSaved }: GoalCreateSheetProps
   const [targetAmount, setTargetAmount] = useState(0)
   const [currency, setCurrency] = useState('USD')
   const [deadline, setDeadline] = useState('')
+  const [icon, setIcon] = useState('target')
+  const [color, setColor] = useState('#5DD6A8')
   const [saving, setSaving] = useState(false)
 
   const reducedMotion = useAppReducedMotion()
@@ -29,6 +31,8 @@ export function GoalCreateSheet({ open, onClose, onSaved }: GoalCreateSheetProps
       setTargetAmount(0)
       setCurrency('USD')
       setDeadline('')
+      setIcon('target')
+      setColor('#5DD6A8')
     }
   }, [open])
 
@@ -64,6 +68,8 @@ export function GoalCreateSheet({ open, onClose, onSaved }: GoalCreateSheetProps
           targetAmount,
           currency,
           deadline: deadline || undefined,
+          icon,
+          color,
         }),
       })
       if (res.ok) {
@@ -142,6 +148,27 @@ export function GoalCreateSheet({ open, onClose, onSaved }: GoalCreateSheetProps
                 value={deadline}
                 onChange={e => setDeadline(e.target.value)}
                 className="bg-surface-2 border-hairline text-text-primary"
+              />
+            </div>
+
+            <div className="mt-3">
+              <label className="text-xs text-text-secondary mb-1 block">Icon (Lucide name)</label>
+              <input
+                type="text"
+                value={icon}
+                onChange={e => setIcon(e.target.value)}
+                placeholder="e.g. target"
+                className="w-full bg-surface-2 border border-hairline rounded-[var(--radius-md)] px-3 py-2 text-sm text-text-primary outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+
+            <div className="mt-3">
+              <label className="text-xs text-text-secondary mb-1 block">Color</label>
+              <input
+                type="color"
+                value={color}
+                onChange={e => setColor(e.target.value)}
+                className="h-9 w-full cursor-pointer rounded-[var(--radius-md)] border border-hairline bg-surface-2"
               />
             </div>
 

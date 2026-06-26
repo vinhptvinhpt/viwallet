@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { Plus, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Skeleton from '@/components/ui/Skeleton'
@@ -36,8 +37,9 @@ export default function GoalsPage() {
       .then(r => r.json())
       .then(data => {
         setGoals(Array.isArray(data) ? data : [])
-        setLoading(false)
       })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   function handleCreated(goal: GoalSummary) {
@@ -70,9 +72,9 @@ export default function GoalsPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {goals.map((goal, i) => (
-            <a key={goal.id} href={`/goals/${goal.id}`} className="block">
+            <Link key={goal.id} href={`/goals/${goal.id}`} className="block">
               <GoalCard goal={goal} index={i} />
-            </a>
+            </Link>
           ))}
         </div>
       )}
