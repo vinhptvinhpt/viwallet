@@ -9,11 +9,13 @@ import Skeleton from '@/components/ui/Skeleton'
 import EmptyState from '@/components/shared/EmptyState'
 import Pressable from '@/components/motion/Pressable'
 import IconTile from '@/components/shared/IconTile'
+import { TripCreateSheet } from '@/components/trips/TripCreateSheet'
 import type { Trip } from '@/types'
 
 export default function TripsPage() {
   const [trips, setTrips] = useState<Trip[]>([])
   const [loading, setLoading] = useState(true)
+  const [showCreate, setShowCreate] = useState(false)
 
   useEffect(() => {
     fetch('/api/trips')
@@ -29,7 +31,7 @@ export default function TripsPage() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-text-primary">Trips</h1>
-        <Button size="sm">
+        <Button size="sm" onClick={() => setShowCreate(true)}>
           <Plus size={16} className="mr-1.5" /> New Trip
         </Button>
       </div>
@@ -109,6 +111,12 @@ export default function TripsPage() {
           ))}
         </motion.div>
       )}
+
+      <TripCreateSheet
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onCreated={trip => setTrips(prev => [trip, ...prev])}
+      />
     </div>
   )
 }
