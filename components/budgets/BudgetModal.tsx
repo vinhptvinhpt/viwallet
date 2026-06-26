@@ -16,7 +16,7 @@ export function BudgetModal({ open, onClose, onSave }: BudgetModalProps) {
   const [name, setName] = useState('')
   const [type, setType] = useState<'LIMIT' | 'ENVELOPE'>('LIMIT')
   const [amount, setAmount] = useState('')
-  const [currency, setCurrency] = useState('USD')
+  const [currency, setCurrency] = useState('VND')
   const [categoryId, setCategoryId] = useState('')
   const [alertThreshold, setAlertThreshold] = useState(80)
   const [saving, setSaving] = useState(false)

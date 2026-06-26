@@ -16,7 +16,7 @@ interface GoalCreateSheetProps {
 export function GoalCreateSheet({ open, onClose, onSaved }: GoalCreateSheetProps) {
   const [name, setName] = useState('')
   const [targetAmount, setTargetAmount] = useState(0)
-  const [currency, setCurrency] = useState('USD')
+  const [currency, setCurrency] = useState('VND')
   const [deadline, setDeadline] = useState('')
   const [icon, setIcon] = useState('target')
   const [color, setColor] = useState('#5DD6A8')
@@ -29,7 +29,7 @@ export function GoalCreateSheet({ open, onClose, onSaved }: GoalCreateSheetProps
     if (open) {
       setName('')
       setTargetAmount(0)
-      setCurrency('USD')
+      setCurrency('VND')
       setDeadline('')
       setIcon('target')
       setColor('#5DD6A8')

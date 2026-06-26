@@ -17,7 +17,7 @@ export function DebtCreateSheet({ open, onClose, onSaved }: DebtCreateSheetProps
   const [direction, setDirection] = useState<'I_OWE' | 'OWED_TO_ME'>('I_OWE')
   const [counterparty, setCounterparty] = useState('')
   const [amount, setAmount] = useState(0)
-  const [currency, setCurrency] = useState('USD')
+  const [currency, setCurrency] = useState('VND')
   const [dueDate, setDueDate] = useState('')
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
@@ -30,7 +30,7 @@ export function DebtCreateSheet({ open, onClose, onSaved }: DebtCreateSheetProps
       setDirection('I_OWE')
       setCounterparty('')
       setAmount(0)
-      setCurrency('USD')
+      setCurrency('VND')
       setDueDate('')
       setNote('')
     }

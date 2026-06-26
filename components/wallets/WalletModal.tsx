@@ -22,7 +22,7 @@ interface WalletModalProps {
 
 export function WalletModal({ open, onOpenChange, wallet, onSuccess }: WalletModalProps) {
   const [name, setName] = useState(wallet?.name ?? '')
-  const [currency, setCurrency] = useState(wallet?.currency ?? 'USD')
+  const [currency, setCurrency] = useState(wallet?.currency ?? 'VND')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {

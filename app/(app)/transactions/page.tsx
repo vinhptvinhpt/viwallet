@@ -34,7 +34,7 @@ function WeeklyBarsCard({ transactions }: { transactions: TransactionWithRelatio
 
   const max = Math.max(...totals, 1)
   const peakIdx = totals.indexOf(max)
-  const currency = transactions.find(t => t.type === 'EXPENSE')?.currency ?? 'USD'
+  const currency = transactions.find(t => t.type === 'EXPENSE')?.currency ?? 'VND'
 
   return (
     <div className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-4 mx-4 mb-4">

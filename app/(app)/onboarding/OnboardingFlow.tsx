@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const CURRENCIES = [
+  { code: 'VND', label: 'Vietnamese Dong', symbol: '₫' },
   { code: 'USD', label: 'US Dollar', symbol: '$' },
   { code: 'EUR', label: 'Euro', symbol: '€' },
   { code: 'GBP', label: 'British Pound', symbol: '£' },
@@ -13,7 +14,6 @@ const CURRENCIES = [
   { code: 'CHF', label: 'Swiss Franc', symbol: 'CHF' },
   { code: 'INR', label: 'Indian Rupee', symbol: '₹' },
   { code: 'SGD', label: 'Singapore Dollar', symbol: 'S$' },
-  { code: 'VND', label: 'Vietnamese Dong', symbol: '₫' },
 ]
 
 const WALLET_TYPES = [
@@ -33,7 +33,7 @@ export default function OnboardingFlow() {
 
   // Step 1 fields
   const [name, setName] = useState('')
-  const [currency, setCurrency] = useState('USD')
+  const [currency, setCurrency] = useState('VND')
   const [walletType, setWalletType] = useState<WalletType>('CASH')
 
   // Step 2 fields

@@ -27,7 +27,7 @@ const MODE_OPTIONS = [
 export function TransactionModal({ open, onClose, onSave, wallets }: TransactionModalProps) {
   const [mode, setMode] = useState<'EXPENSE' | 'INCOME' | 'TRANSFER'>('EXPENSE')
   const [amount, setAmount] = useState(0)
-  const [currency, setCurrency] = useState(wallets[0]?.currency ?? 'USD')
+  const [currency, setCurrency] = useState(wallets[0]?.currency ?? 'VND')
   const [walletId, setWalletId] = useState(wallets[0]?.id ?? '')
   const [categoryId, setCategoryId] = useState('')
   const [note, setNote] = useState('')
@@ -285,7 +285,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
                   </select>
                 </div>
                 <div className="mt-3">
-                  <AmountInput value={amount} onChange={setAmount} currency={fromWallet?.currency ?? 'USD'} />
+                  <AmountInput value={amount} onChange={setAmount} currency={fromWallet?.currency ?? 'VND'} />
                 </div>
                 {transferCurrenciesDiffer && (
                   <div className="mt-3">

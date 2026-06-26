@@ -59,7 +59,7 @@ export default function DebtsPage() {
   const owedToMe = debts.filter(d => d.direction === 'OWED_TO_ME')
 
   // Use the first debt's currency for section totals (most common case — single currency)
-  const defaultCurrency = debts[0]?.currency ?? 'USD'
+  const defaultCurrency = debts[0]?.currency ?? 'VND'
 
   const iOweTotalByCurrency = iOwe.reduce<Record<string, number>>((acc, d) => {
     acc[d.currency] = (acc[d.currency] ?? 0) + d.remainingAmount

@@ -12,7 +12,7 @@ export default function ReportsPage() {
   const [month, setMonth] = useState(new Date())
   const [summary, setSummary] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const currency = 'USD' // TODO: use user.baseCurrency from context
+  const currency = 'VND'
 
   useEffect(() => {
     setLoading(true)

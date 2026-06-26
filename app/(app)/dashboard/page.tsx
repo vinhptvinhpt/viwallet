@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const [transactions, setTransactions] = useState<TransactionWithRelations[]>([])
   const [summary, setSummary] = useState<ReportSummary | null>(null)
   const [loading, setLoading] = useState(true)
-  const currency = 'USD'
+  const currency = 'VND'
 
   useEffect(() => {
     const from = startOfMonth(new Date()).toISOString()
