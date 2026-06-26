@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, List, Target, Plane, BarChart2, Settings } from 'lucide-react'
+import { Home, List, Target, Plane, BarChart2, Settings, Goal, CreditCard } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ThemeToggle from '@/components/theme/ThemeToggle'
 
@@ -10,6 +10,8 @@ const NAV_ITEMS = [
   { href: '/transactions', icon: List, label: 'Transactions' },
   { href: '/budgets', icon: Target, label: 'Budgets' },
   { href: '/trips', icon: Plane, label: 'Trips' },
+  { href: '/goals', icon: Goal, label: 'Goals' },
+  { href: '/debts', icon: CreditCard, label: 'Debts' },
   { href: '/reports', icon: BarChart2, label: 'Reports' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
