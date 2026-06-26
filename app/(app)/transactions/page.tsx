@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Wallet as WalletIcon } from 'lucide-react'
 import { format, getDay } from 'date-fns'
 import { motion } from 'motion/react'
 import { TransactionRow } from '@/components/transactions/TransactionRow'
@@ -9,6 +9,7 @@ import { FilterSheet } from '@/components/transactions/FilterSheet'
 import PillToggle from '@/components/ui/PillToggle'
 import { Input } from '@/components/ui/input'
 import Skeleton from '@/components/ui/Skeleton'
+import EmptyState from '@/components/shared/EmptyState'
 import { formatAmount } from '@/lib/currency'
 import type { TransactionWithRelations, Wallet } from '@/types'
 
@@ -217,11 +218,11 @@ export default function TransactionsPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <p className="text-center text-text-secondary py-20 text-sm">
-          {Object.keys(activeFilters).length > 0 || typeFilter !== 'ALL'
-            ? 'No transactions match your filters.'
-            : 'No transactions yet.'}
-        </p>
+        <EmptyState
+          icon={WalletIcon}
+          title={Object.keys(activeFilters).length > 0 || typeFilter !== 'ALL' ? 'No matching transactions' : 'No transactions yet'}
+          subtitle={Object.keys(activeFilters).length > 0 || typeFilter !== 'ALL' ? 'Try adjusting your filters.' : 'Tap + to record your first transaction.'}
+        />
       ) : (
         <motion.div
           initial="hidden"

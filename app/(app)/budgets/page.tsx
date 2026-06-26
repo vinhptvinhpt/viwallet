@@ -1,11 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, CreditCard } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { BudgetCard } from '@/components/budgets/BudgetCard'
 import { BudgetModal } from '@/components/budgets/BudgetModal'
 import { Button } from '@/components/ui/button'
 import Skeleton from '@/components/ui/Skeleton'
+import EmptyState from '@/components/shared/EmptyState'
 import type { BudgetWithSpent, Budget } from '@/types'
 
 function BudgetCardSkeleton() {
@@ -73,7 +74,13 @@ export default function BudgetsPage() {
                 <BudgetCardSkeleton />
               </>
             ) : limits.length === 0 ? (
-              <p className="text-text-secondary text-center py-12">No spending limits set.</p>
+              <EmptyState
+                icon={CreditCard}
+                title="No spending limits yet"
+                subtitle="Set a limit to track spending by category."
+                actionLabel="Add Budget"
+                onAction={() => setShowModal(true)}
+              />
             ) : (
               limits.map(b => <BudgetCard key={b.id} budget={b} />)
             )}
@@ -88,7 +95,13 @@ export default function BudgetsPage() {
                 <BudgetCardSkeleton />
               </>
             ) : envelopes.length === 0 ? (
-              <p className="text-text-secondary text-center py-12">No envelopes set.</p>
+              <EmptyState
+                icon={CreditCard}
+                title="No envelopes yet"
+                subtitle="Envelope budgets let you allocate money per category."
+                actionLabel="Add Budget"
+                onAction={() => setShowModal(true)}
+              />
             ) : (
               envelopes.map(b => <BudgetCard key={b.id} budget={b} />)
             )}

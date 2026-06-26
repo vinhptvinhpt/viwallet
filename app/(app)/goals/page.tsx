@@ -1,11 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Target } from 'lucide-react'
+import { Plus, PiggyBank } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Skeleton from '@/components/ui/Skeleton'
 import { GoalCard } from '@/components/goals/GoalCard'
 import { GoalCreateSheet } from '@/components/goals/GoalCreateSheet'
+import EmptyState from '@/components/shared/EmptyState'
 import type { GoalSummary } from '@/components/goals/GoalCard'
 
 function GoalCardSkeleton() {
@@ -62,13 +63,13 @@ export default function GoalsPage() {
           <GoalCardSkeleton />
         </div>
       ) : goals.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-text-secondary">
-          <Target size={40} strokeWidth={1.5} />
-          <p className="text-sm">No goals yet — set your first target</p>
-          <Button size="sm" variant="outline" onClick={() => setShowCreate(true)}>
-            Create a goal
-          </Button>
-        </div>
+        <EmptyState
+          icon={PiggyBank}
+          title="No goals yet"
+          subtitle="Set a savings target and track your progress."
+          actionLabel="Create a goal"
+          onAction={() => setShowCreate(true)}
+        />
       ) : (
         <div className="flex flex-col gap-3">
           {goals.map((goal, i) => (

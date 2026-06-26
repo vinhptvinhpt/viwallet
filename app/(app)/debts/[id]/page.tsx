@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, Plus, Receipt } from 'lucide-react'
+import { ArrowLeft, Plus, Receipt, History } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -10,6 +10,7 @@ import AnimatedNumber from '@/components/motion/AnimatedNumber'
 import Skeleton from '@/components/ui/Skeleton'
 import { Button } from '@/components/ui/button'
 import { DebtPaymentSheet } from '@/components/debts/DebtPaymentSheet'
+import EmptyState from '@/components/shared/EmptyState'
 import { cn } from '@/lib/utils'
 
 interface DebtPayment {
@@ -184,10 +185,11 @@ export default function DebtDetailPage() {
       <div>
         <h2 className="text-sm font-semibold text-text-secondary mb-3 px-1">Payment History</h2>
         {debt.payments.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 gap-2 text-text-secondary">
-            <Receipt size={32} strokeWidth={1.5} />
-            <p className="text-sm">No payments yet</p>
-          </div>
+          <EmptyState
+            icon={History}
+            title="No payments yet"
+            subtitle="Record a payment to track your progress."
+          />
         ) : (
           <div className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden divide-y divide-[var(--color-border-hairline)] border border-hairline">
             <motion.ul

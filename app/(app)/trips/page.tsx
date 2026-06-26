@@ -1,11 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, MapPin } from 'lucide-react'
+import { Plus, MapPin, Plane } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import Link from 'next/link'
 import Skeleton from '@/components/ui/Skeleton'
+import EmptyState from '@/components/shared/EmptyState'
 import Pressable from '@/components/motion/Pressable'
 import IconTile from '@/components/shared/IconTile'
 import type { Trip } from '@/types'
@@ -53,7 +54,11 @@ export default function TripsPage() {
           ))}
         </div>
       ) : trips.length === 0 ? (
-        <p className="text-text-secondary text-center py-16 text-sm">No trips yet.</p>
+        <EmptyState
+          icon={Plane}
+          title="No trips yet"
+          subtitle="Create a trip to track travel expenses in one place."
+        />
       ) : (
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 gap-4"

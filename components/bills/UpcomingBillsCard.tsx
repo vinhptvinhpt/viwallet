@@ -1,7 +1,9 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { Receipt } from 'lucide-react'
 import Skeleton from '@/components/ui/Skeleton'
 import { cn } from '@/lib/utils'
+import EmptyState from '@/components/shared/EmptyState'
 
 interface Bill {
   id: string
@@ -74,7 +76,7 @@ export function UpcomingBillsCard() {
     return (
       <div className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-4">
         <p className="text-sm font-semibold text-text-secondary mb-3">Upcoming Bills</p>
-        <p className="text-xs text-text-secondary text-center py-4">No upcoming bills.</p>
+        <EmptyState icon={Receipt} title="No upcoming bills" subtitle="All clear — no bills due soon." />
       </div>
     )
   }

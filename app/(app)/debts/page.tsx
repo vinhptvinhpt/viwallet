@@ -1,11 +1,12 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Plus, Handshake } from 'lucide-react'
+import { Plus, CreditCard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Skeleton from '@/components/ui/Skeleton'
 import { DebtCard } from '@/components/debts/DebtCard'
 import { DebtCreateSheet } from '@/components/debts/DebtCreateSheet'
+import EmptyState from '@/components/shared/EmptyState'
 import AnimatedNumber from '@/components/motion/AnimatedNumber'
 import { formatAmount } from '@/lib/currency'
 import type { DebtSummary } from '@/components/debts/DebtCard'
@@ -92,13 +93,13 @@ export default function DebtsPage() {
           <DebtCardSkeleton />
         </div>
       ) : debts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-text-secondary">
-          <Handshake size={40} strokeWidth={1.5} />
-          <p className="text-sm">No debts yet — track what you owe or are owed</p>
-          <Button size="sm" variant="outline" onClick={() => setShowCreate(true)}>
-            Add a debt
-          </Button>
-        </div>
+        <EmptyState
+          icon={CreditCard}
+          title="No debts yet"
+          subtitle="Track what you owe or are owed by others."
+          actionLabel="Add a debt"
+          onAction={() => setShowCreate(true)}
+        />
       ) : (
         <div className="space-y-6">
           {/* I owe section */}

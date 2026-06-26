@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { useParams } from 'next/navigation'
-import { ArrowLeft, Plus, PiggyBank } from 'lucide-react'
+import { ArrowLeft, Plus, History } from 'lucide-react'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { format } from 'date-fns'
@@ -11,6 +11,7 @@ import Skeleton from '@/components/ui/Skeleton'
 import IconTile from '@/components/shared/IconTile'
 import { Button } from '@/components/ui/button'
 import { GoalContributeSheet } from '@/components/goals/GoalContributeSheet'
+import EmptyState from '@/components/shared/EmptyState'
 import { getCategoryIcon } from '@/components/shared/categoryIcon'
 import { cn } from '@/lib/utils'
 
@@ -166,10 +167,11 @@ export default function GoalDetailPage() {
       <div>
         <h2 className="text-sm font-semibold text-text-secondary mb-3 px-1">Contributions</h2>
         {goal.contributions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 gap-2 text-text-secondary">
-            <PiggyBank size={32} strokeWidth={1.5} />
-            <p className="text-sm">No contributions yet</p>
-          </div>
+          <EmptyState
+            icon={History}
+            title="No contributions yet"
+            subtitle="Add your first contribution to start tracking progress."
+          />
         ) : (
           <div className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] overflow-hidden divide-y divide-[var(--color-border-hairline)] border border-hairline">
             <motion.ul
