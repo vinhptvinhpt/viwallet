@@ -8,6 +8,7 @@ import AnimatedNumber from '@/components/motion/AnimatedNumber'
 import Skeleton from '@/components/ui/Skeleton'
 import IconTile from '@/components/shared/IconTile'
 import { getCategoryIcon } from '@/components/shared/categoryIcon'
+import { UpcomingBillsCard } from '@/components/bills/UpcomingBillsCard'
 import type { Wallet, BudgetWithSpent, TransactionWithRelations } from '@/types'
 
 interface ReportSummary {
@@ -96,6 +97,9 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* ── Upcoming Bills Card ── */}
+      <UpcomingBillsCard />
 
       {/* ── Hero Analytics Card ── */}
       <div className="bg-hero text-on-hero rounded-[var(--radius-lg)] p-5">
