@@ -26,7 +26,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   ]
   if (body.walletId) {
     const w = await prisma.wallet.findFirst({ where: { id: body.walletId, userId: user.id } })
-    if (w) ops.push(prisma.wallet.update({ where: { id: w.id }, data: { currentBalance: w.currentBalance - body.amount } }))
+    if (w) {
+      if (w.currentBalance < body.amount) {
+        return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 })
+      }
+      ops.push(prisma.wallet.update({ where: { id: w.id }, data: { currentBalance: w.currentBalance - body.amount } }))
+    }
   }
   await prisma.$transaction(ops)
   return NextResponse.json({ ok: true, ...next })
