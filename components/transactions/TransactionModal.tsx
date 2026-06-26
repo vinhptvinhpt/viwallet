@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { AmountInput } from '@/components/shared/AmountInput'
 import { CategoryPicker } from '@/components/shared/CategoryPicker'
 import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
+import SuccessCheck from '@/components/motion/SuccessCheck'
 import PillToggle from '@/components/ui/PillToggle'
 import { createClient } from '@/lib/supabase/client'
 import { validateReceiptFiles } from '@/lib/attachments'
@@ -34,6 +35,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [exchangeRate, setExchangeRate] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   // Receipt state
   const [receiptFiles, setReceiptFiles] = useState<File[]>([])
@@ -168,7 +170,8 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
           }),
         })
         if (res.ok) {
-          onClose()
+          setSaved(true)
+          setTimeout(() => { setSaved(false); onClose() }, 900)
         }
       } finally {
         setSaving(false)
@@ -209,7 +212,8 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
                 if (patchRes.ok) {
                   const updated = await patchRes.json()
                   onSave(updated)
-                  onClose()
+                  setSaved(true)
+                  setTimeout(() => { setSaved(false); onClose() }, 900)
                   return
                 }
               }
@@ -220,7 +224,8 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
         }
 
         onSave(tx)
-        onClose()
+        setSaved(true)
+        setTimeout(() => { setSaved(false); onClose() }, 900)
       }
     } finally {
       setSaving(false)
@@ -260,6 +265,14 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
             onDragEnd={(_, info) => { if (info.offset.y > 120) onClose() }}
           >
             <h2 id="tx-modal-title" className="text-base font-semibold text-text-primary mb-4">Add Transaction</h2>
+
+            {/* Success feedback */}
+            {saved && (
+              <div className="flex justify-center py-4">
+                <SuccessCheck show={saved} />
+              </div>
+            )}
+
             <div className="mb-4">
               <PillToggle
                 options={MODE_OPTIONS}

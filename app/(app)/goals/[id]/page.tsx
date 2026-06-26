@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import { formatAmount } from '@/lib/currency'
 import AnimatedNumber from '@/components/motion/AnimatedNumber'
+import Confetti from '@/components/motion/Confetti'
 import Skeleton from '@/components/ui/Skeleton'
 import IconTile from '@/components/shared/IconTile'
 import { Button } from '@/components/ui/button'
@@ -41,6 +42,7 @@ export default function GoalDetailPage() {
   const [goal, setGoal] = useState<GoalDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [showContribute, setShowContribute] = useState(false)
+  const [fireConfetti, setFireConfetti] = useState(false)
 
   const loadGoal = useCallback(() => {
     fetch(`/api/goals/${id}`)
@@ -101,6 +103,8 @@ export default function GoalDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-5 space-y-4">
+      <Confetti fire={fireConfetti} />
+
       {/* Back link */}
       <Link
         href="/goals"
@@ -214,6 +218,7 @@ export default function GoalDetailPage() {
         open={showContribute}
         onClose={() => setShowContribute(false)}
         onSaved={loadGoal}
+        onCompleted={() => { setFireConfetti(true); setTimeout(() => setFireConfetti(false), 1000) }}
         goalId={goal.id}
         goalCurrency={goal.currency}
       />

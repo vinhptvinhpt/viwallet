@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AmountInput } from '@/components/shared/AmountInput'
 import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
+import SuccessCheck from '@/components/motion/SuccessCheck'
 
 interface Wallet {
   id: string
@@ -33,6 +34,7 @@ export function DebtPaymentSheet({
   const [note, setNote] = useState('')
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const reducedMotion = useAppReducedMotion()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -94,7 +96,8 @@ export function DebtPaymentSheet({
       })
       if (res.ok) {
         onSuccess()
-        onClose()
+        setSaved(true)
+        setTimeout(() => { setSaved(false); onClose() }, 900)
       }
     } catch {
       // network failure — spinner clears via finally
@@ -138,6 +141,13 @@ export function DebtPaymentSheet({
             <h2 id="debt-payment-title" className="text-base font-semibold text-text-primary mb-4">
               Record Payment
             </h2>
+
+            {/* Success feedback */}
+            {saved && (
+              <div className="flex justify-center py-4">
+                <SuccessCheck show={saved} />
+              </div>
+            )}
 
             <AmountInput value={amount} onChange={setAmount} currency={debtCurrency} />
 

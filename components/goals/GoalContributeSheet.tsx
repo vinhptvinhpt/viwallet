@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AmountInput } from '@/components/shared/AmountInput'
 import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
+import SuccessCheck from '@/components/motion/SuccessCheck'
 
 interface Wallet {
   id: string
@@ -16,6 +17,7 @@ interface GoalContributeSheetProps {
   open: boolean
   onClose: () => void
   onSaved: () => void
+  onCompleted?: () => void
   goalId: string
   goalCurrency: string
 }
@@ -24,6 +26,7 @@ export function GoalContributeSheet({
   open,
   onClose,
   onSaved,
+  onCompleted,
   goalId,
   goalCurrency,
 }: GoalContributeSheetProps) {
@@ -33,6 +36,7 @@ export function GoalContributeSheet({
   const [note, setNote] = useState('')
   const [wallets, setWallets] = useState<Wallet[]>([])
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
   const reducedMotion = useAppReducedMotion()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -94,8 +98,11 @@ export function GoalContributeSheet({
         }),
       })
       if (res.ok) {
+        const data = await res.json()
         onSaved()
-        onClose()
+        if (data.status === 'COMPLETED') onCompleted?.()
+        setSaved(true)
+        setTimeout(() => { setSaved(false); onClose() }, 900)
       }
     } finally {
       setSaving(false)
@@ -137,6 +144,13 @@ export function GoalContributeSheet({
             <h2 id="contribute-modal-title" className="text-base font-semibold text-text-primary mb-4">
               Add Contribution
             </h2>
+
+            {/* Success feedback */}
+            {saved && (
+              <div className="flex justify-center py-4">
+                <SuccessCheck show={saved} />
+              </div>
+            )}
 
             <AmountInput value={amount} onChange={setAmount} currency={goalCurrency} />
 
