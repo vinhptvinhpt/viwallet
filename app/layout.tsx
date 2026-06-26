@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import ThemeProvider from '@/components/theme/ThemeProvider'
+import PwaComponents from '@/components/pwa/PwaComponents'
 
 export const metadata: Metadata = {
   title: 'ViWallet',
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <ThemeProvider>
           {children}
           <Toaster />
+          <PwaComponents />
         </ThemeProvider>
         <script dangerouslySetInnerHTML={{ __html: `if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js') }` }} />
       </body>
