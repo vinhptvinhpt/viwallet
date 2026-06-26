@@ -2,10 +2,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { Wallet, Tag, Download, Upload, Vibrate } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import AppearanceCard from '@/components/theme/AppearanceCard'
 import { Button } from '@/components/ui/button'
-import { ImportWizard } from '@/components/data/ImportWizard'
 import { hapticsEnabled, setHapticsEnabled } from '@/lib/haptics'
+
+const ImportWizard = dynamic(
+  () => import('@/components/data/ImportWizard').then(m => ({ default: m.ImportWizard })),
+  { ssr: false, loading: () => null }
+)
 
 const SETTINGS_ITEMS = [
   { href: '/settings/wallets', icon: Wallet, label: 'Wallets', desc: 'Manage your wallets and accounts' },

@@ -2,11 +2,20 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { startOfMonth, endOfMonth, addMonths, format } from 'date-fns'
-import { SpendingDonut } from '@/components/reports/SpendingDonut'
-import { IncomeExpenseArea } from '@/components/reports/IncomeExpenseArea'
+import dynamic from 'next/dynamic'
 import { formatAmount } from '@/lib/currency'
 import Skeleton from '@/components/ui/Skeleton'
 import AnimatedNumber from '@/components/motion/AnimatedNumber'
+
+const SpendingDonut = dynamic(
+  () => import('@/components/reports/SpendingDonut').then(m => ({ default: m.SpendingDonut })),
+  { ssr: false, loading: () => <Skeleton className="h-48 w-full rounded-[var(--radius-lg)]" /> }
+)
+
+const IncomeExpenseArea = dynamic(
+  () => import('@/components/reports/IncomeExpenseArea').then(m => ({ default: m.IncomeExpenseArea })),
+  { ssr: false, loading: () => <Skeleton className="h-48 w-full rounded-[var(--radius-lg)]" /> }
+)
 
 export default function ReportsPage() {
   const [month, setMonth] = useState(new Date())

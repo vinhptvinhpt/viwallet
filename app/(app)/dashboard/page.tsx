@@ -1,11 +1,16 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
+import dynamic from 'next/dynamic'
 import { formatAmount } from '@/lib/currency'
-import { SpendingDonut } from '@/components/reports/SpendingDonut'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import AnimatedNumber from '@/components/motion/AnimatedNumber'
 import Skeleton from '@/components/ui/Skeleton'
+
+const SpendingDonut = dynamic(
+  () => import('@/components/reports/SpendingDonut').then(m => ({ default: m.SpendingDonut })),
+  { ssr: false, loading: () => <Skeleton className="h-48 w-full rounded-[var(--radius-lg)]" /> }
+)
 import IconTile from '@/components/shared/IconTile'
 import { getCategoryIcon } from '@/components/shared/categoryIcon'
 import { UpcomingBillsCard } from '@/components/bills/UpcomingBillsCard'
