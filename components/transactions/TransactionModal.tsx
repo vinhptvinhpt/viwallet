@@ -40,6 +40,15 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
   const reducedMotion = useAppReducedMotion()
   const panelRef = useRef<HTMLDivElement>(null)
 
+  // 1. Reset shared fields when mode changes to prevent cross-mode data bleed
+  useEffect(() => {
+    setAmount(0)
+    setExchangeRate(null)
+    setCategoryId('')
+    setWalletId(wallets[0]?.id ?? '')
+    setNote('')
+  }, [mode]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // 2. Escape-to-close
   useEffect(() => {
     if (!open) return
