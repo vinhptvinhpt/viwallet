@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getUser } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { buildTransactionWhere } from '@/lib/txn-filter'
 import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
@@ -29,27 +30,9 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const limit = parseInt(searchParams.get('limit') ?? '30')
   const offset = parseInt(searchParams.get('offset') ?? '0')
-  const walletId = searchParams.get('walletId')
-  const categoryId = searchParams.get('categoryId')
-  const tripId = searchParams.get('tripId')
-  const type = searchParams.get('type')
-  const from = searchParams.get('from')
-  const to = searchParams.get('to')
 
   const transactions = await prisma.transaction.findMany({
-    where: {
-      userId: user.id,
-      ...(walletId && { walletId }),
-      ...(categoryId && { categoryId }),
-      ...(tripId && { tripId }),
-      ...(type && { type: type as any }),
-      ...(from || to ? {
-        date: {
-          ...(from && { gte: new Date(from) }),
-          ...(to && { lte: new Date(to) }),
-        }
-      } : {}),
-    },
+    where: buildTransactionWhere(user.id, Object.fromEntries(searchParams)),
     include: {
       category: { select: { id: true, name: true, icon: true, color: true } },
       wallet: { select: { id: true, name: true, currency: true, color: true } },

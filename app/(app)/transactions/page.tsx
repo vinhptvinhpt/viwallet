@@ -1,11 +1,13 @@
 'use client'
 import { useEffect, useState, useMemo } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { format, getDay } from 'date-fns'
 import { motion } from 'motion/react'
 import { TransactionRow } from '@/components/transactions/TransactionRow'
 import { TransactionModal } from '@/components/transactions/TransactionModal'
+import { FilterSheet } from '@/components/transactions/FilterSheet'
 import PillToggle from '@/components/ui/PillToggle'
+import { Input } from '@/components/ui/input'
 import Skeleton from '@/components/ui/Skeleton'
 import { formatAmount } from '@/lib/currency'
 import type { TransactionWithRelations, Wallet } from '@/types'
@@ -96,17 +98,20 @@ export default function TransactionsPage() {
   const [showModal, setShowModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState('ALL')
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false)
+  const [activeFilters, setActiveFilters] = useState<Record<string, string>>({})
 
   useEffect(() => {
+    const params = new URLSearchParams(activeFilters)
     Promise.all([
-      fetch('/api/transactions').then(r => r.json()),
+      fetch(`/api/transactions?${params}`).then(r => r.json()),
       fetch('/api/wallets').then(r => r.json()),
     ]).then(([txs, ws]) => {
       setTransactions(txs)
       setWallets(ws)
       setLoading(false)
     })
-  }, [])
+  }, [activeFilters])
 
   function handleSave(tx: TransactionWithRelations) {
     setTransactions(prev => [tx, ...prev])
@@ -130,11 +135,63 @@ export default function TransactionsPage() {
     [filtered]
   )
 
+  function handleRemoveFilter(key: string) {
+    setActiveFilters(prev => {
+      const next = { ...prev }
+      delete next[key]
+      return next
+    })
+  }
+
+  function handleApplyFilters(params: Record<string, string>) {
+    setActiveFilters(params)
+  }
+
+  const filterChips = Object.entries(activeFilters).filter(([k]) => k !== 'limit' && k !== 'offset')
+
   return (
     <div className="max-w-2xl mx-auto pb-32">
       {/* ── Header ── */}
       <div className="p-6 pb-4">
         <h1 className="text-2xl font-bold text-text-primary mb-4">Transactions</h1>
+
+        {/* Search input and filters button */}
+        <div className="flex gap-2 mb-4">
+          <Input
+            placeholder="Search transactions..."
+            value={activeFilters.q || ''}
+            onChange={e => setActiveFilters(prev => ({ ...prev, q: e.target.value }))}
+            className="bg-surface-2 border-hairline flex-1"
+          />
+          <button
+            onClick={() => setFilterSheetOpen(true)}
+            className="px-4 py-2 bg-surface-2 border border-hairline rounded-[var(--radius-md)] text-sm font-medium text-text-primary hover:bg-surface-2/80 transition-colors"
+          >
+            Filters
+          </button>
+        </div>
+
+        {/* Active filters chips */}
+        {filterChips.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {filterChips.map(([key, value]) => (
+              <div
+                key={key}
+                className="flex items-center gap-2 px-2.5 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full"
+              >
+                <span>{key}: {value}</span>
+                <button
+                  onClick={() => handleRemoveFilter(key)}
+                  className="hover:text-primary/70"
+                  aria-label={`Remove ${key} filter`}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         <PillToggle
           options={FILTER_OPTIONS}
           value={typeFilter}
@@ -218,6 +275,14 @@ export default function TransactionsPage() {
           </p>
         )
       )}
+
+      {/* ── Filter Sheet ── */}
+      <FilterSheet
+        open={filterSheetOpen}
+        onClose={() => setFilterSheetOpen(false)}
+        onApply={handleApplyFilters}
+        wallets={wallets}
+      />
     </div>
   )
 }
