@@ -9,7 +9,6 @@ import { format } from 'date-fns'
 import AnimatedNumber from '@/components/motion/AnimatedNumber'
 import Skeleton from '@/components/ui/Skeleton'
 import IconTile from '@/components/shared/IconTile'
-import { getCategoryIcon } from '@/components/shared/categoryIcon'
 import { TransactionRow } from '@/components/transactions/TransactionRow'
 import type { Trip, TransactionWithRelations } from '@/types'
 
@@ -110,12 +109,7 @@ export default function TripDetailPage() {
         {/* ── Title (when no cover) ── */}
         {!trip.coverImage && (
           <div className="flex items-center gap-3">
-            <div
-              className="w-12 h-12 rounded-[var(--radius-md)] shrink-0 flex items-center justify-center"
-              style={{ background: 'var(--color-primary-muted)', color: 'var(--color-primary)' }}
-            >
-              <MapPin size={22} />
-            </div>
+            <IconTile icon={MapPin} size={48} />
             <div>
               <h1 className="text-2xl font-bold text-text-primary">{trip.name}</h1>
               <p className="text-text-secondary text-sm mt-0.5">

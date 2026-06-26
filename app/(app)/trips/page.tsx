@@ -7,6 +7,7 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import Skeleton from '@/components/ui/Skeleton'
 import Pressable from '@/components/motion/Pressable'
+import IconTile from '@/components/shared/IconTile'
 import type { Trip } from '@/types'
 
 export default function TripsPage() {
@@ -82,12 +83,7 @@ export default function TripsPage() {
                         className="w-11 h-11 rounded-[var(--radius-md)] object-cover shrink-0"
                       />
                     ) : (
-                      <div
-                        className="w-11 h-11 rounded-[var(--radius-md)] shrink-0 flex items-center justify-center"
-                        style={{ background: 'var(--color-primary-muted)', color: 'var(--color-primary)' }}
-                      >
-                        <MapPin size={20} />
-                      </div>
+                      <IconTile icon={MapPin} size={44} />
                     )}
                     <div className="min-w-0">
                       <p className="font-semibold text-text-primary truncate">{trip.name}</p>
