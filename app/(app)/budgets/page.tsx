@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button'
 import Skeleton from '@/components/ui/Skeleton'
 import type { BudgetWithSpent, Budget } from '@/types'
 
-export const dynamic = 'force-dynamic'
-
 function BudgetCardSkeleton() {
   return (
     <div className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-4 space-y-3">

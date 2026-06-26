@@ -143,7 +143,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
               {(['EXPENSE', 'INCOME'] as const).map(t => (
                 <button key={t} onClick={() => setType(t)}
                   className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    type === t ? 'bg-primary text-white' : 'bg-surface-2 text-slate-400'
+                    type === t ? 'bg-primary text-white' : 'bg-surface-2 text-text-secondary'
                   }`}
                 >{t}</button>
               ))}
@@ -153,12 +153,12 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
             </div>
             {showExchangeRate && (
               <div className="mt-3">
-                <label className="text-xs text-slate-400 mb-1 block">Exchange Rate (1 {currency} = ? {selectedWallet.currency})</label>
+                <label className="text-xs text-text-secondary mb-1 block">Exchange Rate (1 {currency} = ? {selectedWallet.currency})</label>
                 <Input
                   type="number"
                   placeholder="Enter rate"
                   onChange={e => setExchangeRate(parseFloat(e.target.value) || null)}
-                  className="bg-surface-2 border-white/10"
+                  className="bg-surface-2 border-hairline"
                 />
               </div>
             )}
@@ -166,19 +166,19 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
               <CategoryPicker value={categoryId} onChange={setCategoryId} type={type} />
             </div>
             <div className="mt-3">
-              <label className="text-xs text-slate-400 mb-1 block">Wallet</label>
+              <label className="text-xs text-text-secondary mb-1 block">Wallet</label>
               <select value={walletId} onChange={e => setWalletId(e.target.value)}
-                className="w-full bg-surface-2 border border-white/10 rounded-lg px-3 py-2 text-sm text-white">
+                className="w-full bg-surface-2 border border-hairline rounded-lg px-3 py-2 text-sm text-text-primary">
                 {wallets.map(w => <option key={w.id} value={w.id}>{w.name} ({w.currency})</option>)}
               </select>
             </div>
             <div className="mt-3">
               <Input type="date" value={date} onChange={e => setDate(e.target.value)}
-                className="bg-surface-2 border-white/10 text-white" />
+                className="bg-surface-2 border-hairline text-text-primary" />
             </div>
             <div className="mt-3">
               <Input placeholder="Note (optional)" value={note} onChange={e => setNote(e.target.value)}
-                className="bg-surface-2 border-white/10" />
+                className="bg-surface-2 border-hairline" />
             </div>
             <div className="pb-4">
               <Button onClick={handleSave} disabled={saving || !amount || !categoryId} className="w-full mt-4">

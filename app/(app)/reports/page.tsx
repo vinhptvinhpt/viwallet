@@ -8,8 +8,6 @@ import { formatAmount } from '@/lib/currency'
 import Skeleton from '@/components/ui/Skeleton'
 import AnimatedNumber from '@/components/motion/AnimatedNumber'
 
-export const dynamic = 'force-dynamic'
-
 export default function ReportsPage() {
   const [month, setMonth] = useState(new Date())
   const [summary, setSummary] = useState<any>(null)

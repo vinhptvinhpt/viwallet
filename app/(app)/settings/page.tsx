@@ -15,13 +15,13 @@ export default function SettingsPage() {
       <div className="flex flex-col gap-2">
         {SETTINGS_ITEMS.map(({ href, icon: Icon, label, desc }) => (
           <Link key={href} href={href}
-            className="flex items-center gap-4 p-4 rounded-xl bg-surface border border-white/10 hover:border-primary/30 transition-colors">
+            className="flex items-center gap-4 p-4 rounded-xl bg-surface border border-hairline hover:border-primary/30 transition-colors">
             <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
               <Icon size={18} className="text-primary" />
             </div>
             <div>
               <p className="font-medium">{label}</p>
-              <p className="text-xs text-slate-400">{desc}</p>
+              <p className="text-xs text-text-secondary">{desc}</p>
             </div>
           </Link>
         ))}
