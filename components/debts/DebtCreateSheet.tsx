@@ -77,6 +77,8 @@ export function DebtCreateSheet({ open, onClose, onSaved }: DebtCreateSheetProps
         onSaved(debt)
         onClose()
       }
+    } catch {
+      // network failure — spinner clears via finally
     } finally {
       setSaving(false)
     }
@@ -145,10 +147,11 @@ export function DebtCreateSheet({ open, onClose, onSaved }: DebtCreateSheetProps
             </div>
 
             <div className="mb-3">
-              <label className="text-xs text-text-secondary mb-1 block">
+              <label htmlFor="debt-counterparty" className="text-xs text-text-secondary mb-1 block">
                 {direction === 'I_OWE' ? 'Who do you owe?' : 'Who owes you?'}
               </label>
               <Input
+                id="debt-counterparty"
                 placeholder="e.g. Alice"
                 value={counterparty}
                 onChange={e => setCounterparty(e.target.value)}
@@ -159,8 +162,9 @@ export function DebtCreateSheet({ open, onClose, onSaved }: DebtCreateSheetProps
             <AmountInput value={amount} onChange={setAmount} currency={currency} />
 
             <div className="mt-3">
-              <label className="text-xs text-text-secondary mb-1 block">Currency</label>
+              <label htmlFor="debt-currency" className="text-xs text-text-secondary mb-1 block">Currency</label>
               <Input
+                id="debt-currency"
                 placeholder="USD"
                 value={currency}
                 onChange={e => setCurrency(e.target.value.toUpperCase())}
@@ -170,8 +174,9 @@ export function DebtCreateSheet({ open, onClose, onSaved }: DebtCreateSheetProps
             </div>
 
             <div className="mt-3">
-              <label className="text-xs text-text-secondary mb-1 block">Due date (optional)</label>
+              <label htmlFor="debt-due-date" className="text-xs text-text-secondary mb-1 block">Due date (optional)</label>
               <Input
+                id="debt-due-date"
                 type="date"
                 value={dueDate}
                 onChange={e => setDueDate(e.target.value)}
@@ -180,7 +185,9 @@ export function DebtCreateSheet({ open, onClose, onSaved }: DebtCreateSheetProps
             </div>
 
             <div className="mt-3">
+              <label htmlFor="debt-note" className="text-xs text-text-secondary mb-1 block">Note (optional)</label>
               <Input
+                id="debt-note"
                 placeholder="Note (optional)"
                 value={note}
                 onChange={e => setNote(e.target.value)}

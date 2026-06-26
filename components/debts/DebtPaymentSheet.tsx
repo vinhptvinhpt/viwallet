@@ -96,6 +96,8 @@ export function DebtPaymentSheet({
         onSuccess()
         onClose()
       }
+    } catch {
+      // network failure — spinner clears via finally
     } finally {
       setSaving(false)
     }
