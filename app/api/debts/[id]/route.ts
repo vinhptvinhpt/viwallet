@@ -47,6 +47,22 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   const debt = await prisma.debt.findFirst({ where: { id, userId: user.id } })
   if (!debt) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-  await prisma.debt.delete({ where: { id } })
+  const payments = await prisma.debtPayment.findMany({ where: { debtId: id } })
+  const walletUpdates: Array<{ id: string; currentBalance: number }> = []
+  for (const p of payments) {
+    if (!p.walletId) continue
+    const w = await prisma.wallet.findUnique({ where: { id: p.walletId } })
+    if (!w) continue
+    const reversed = debt.direction === 'I_OWE'
+      ? w.currentBalance + p.amount
+      : w.currentBalance - p.amount
+    walletUpdates.push({ id: p.walletId, currentBalance: reversed })
+  }
+
+  await prisma.$transaction([
+    ...walletUpdates.map(wu => prisma.wallet.update({ where: { id: wu.id }, data: { currentBalance: wu.currentBalance } })),
+    prisma.debtPayment.deleteMany({ where: { debtId: id } }),
+    prisma.debt.delete({ where: { id } }),
+  ])
   return NextResponse.json({ ok: true })
 }

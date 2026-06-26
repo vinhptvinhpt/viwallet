@@ -28,6 +28,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const w = await prisma.wallet.findFirst({ where: { id: body.walletId, userId: user.id } })
     if (w) {
       const newBalance = walletDeltaForPayment(debt.direction, w.currentBalance, body.amount)
+      if (newBalance < 0) return NextResponse.json({ error: 'Insufficient balance' }, { status: 400 })
       ops.push(prisma.wallet.update({ where: { id: w.id }, data: { currentBalance: newBalance } }))
     }
   }
