@@ -55,6 +55,14 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
     setNote('')
   }, [mode]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 1b. Reset receipt state when modal opens/closes
+  useEffect(() => {
+    if (!open) {
+      setReceiptFiles([])
+      setReceiptError(null)
+    }
+  }, [open])
+
   // 2. Escape-to-close
   useEffect(() => {
     if (!open) return
@@ -133,7 +141,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
     const supabase = createClient()
     const paths: string[] = []
     for (const file of receiptFiles) {
-      const path = `${userId}/${txnId}/${Date.now()}-${file.name}`
+      const path = `${userId}/${txnId}/${crypto.randomUUID()}-${file.name}`
       const { error } = await supabase.storage.from('receipts').upload(path, file)
       if (!error) paths.push(path)
     }
