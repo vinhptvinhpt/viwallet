@@ -9,6 +9,7 @@ export interface TransactionWithRelations {
   type: string
   date: string
   note: string | null
+  photos: string[]
   category: { id: string; name: string; icon: string; color: string }
   wallet: { id: string; name: string; currency: string; color: string }
   trip: { id: string; name: string } | null

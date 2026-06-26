@@ -7,6 +7,8 @@ import { AmountInput } from '@/components/shared/AmountInput'
 import { CategoryPicker } from '@/components/shared/CategoryPicker'
 import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
 import PillToggle from '@/components/ui/PillToggle'
+import { createClient } from '@/lib/supabase/client'
+import { validateReceiptFiles } from '@/lib/attachments'
 import type { Wallet, TransactionWithRelations } from '@/types'
 
 interface TransactionModalProps {
@@ -32,6 +34,10 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [exchangeRate, setExchangeRate] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+
+  // Receipt state
+  const [receiptFiles, setReceiptFiles] = useState<File[]>([])
+  const [receiptError, setReceiptError] = useState<string | null>(null)
 
   // Transfer-specific state
   const [fromWalletId, setFromWalletId] = useState(wallets[0]?.id ?? '')
@@ -109,6 +115,31 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
     ? Math.round(amount * exchangeRate)
     : amount
 
+  function handleReceiptChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    const result = validateReceiptFiles(files)
+    if (!result.ok) {
+      setReceiptError(result.error ?? 'Invalid files')
+      setReceiptFiles([])
+      e.target.value = ''
+      return
+    }
+    setReceiptError(null)
+    setReceiptFiles(files)
+  }
+
+  async function uploadReceipts(txnId: string, userId: string): Promise<string[]> {
+    if (receiptFiles.length === 0) return []
+    const supabase = createClient()
+    const paths: string[] = []
+    for (const file of receiptFiles) {
+      const path = `${userId}/${txnId}/${Date.now()}-${file.name}`
+      const { error } = await supabase.storage.from('receipts').upload(path, file)
+      if (!error) paths.push(path)
+    }
+    return paths
+  }
+
   async function handleSave() {
     if (mode === 'TRANSFER') {
       if (!amount || !fromWalletId || !toWalletId || fromWalletId === toWalletId) return
@@ -153,6 +184,33 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
       })
       if (res.ok) {
         const tx = await res.json()
+
+        // Upload receipts after transaction is created; if upload fails, tx still exists
+        if (receiptFiles.length > 0) {
+          try {
+            const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user) {
+              const paths = await uploadReceipts(tx.id, user.id)
+              if (paths.length > 0) {
+                const patchRes = await fetch(`/api/transactions/${tx.id}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ photos: paths }),
+                })
+                if (patchRes.ok) {
+                  const updated = await patchRes.json()
+                  onSave(updated)
+                  onClose()
+                  return
+                }
+              }
+            }
+          } catch {
+            // Upload failed — transaction still saved, just no photos
+          }
+        }
+
         onSave(tx)
         onClose()
       }
@@ -277,6 +335,27 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
               <Input placeholder="Note (optional)" value={note} onChange={e => setNote(e.target.value)}
                 className="bg-surface-2 border-hairline" />
             </div>
+
+            {/* Receipt file input — only for expense/income, not transfer */}
+            {mode !== 'TRANSFER' && (
+              <div className="mt-3">
+                <label className="text-xs text-text-secondary mb-1 block">Add receipts</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleReceiptChange}
+                  className="w-full text-sm text-text-secondary file:mr-3 file:py-1.5 file:px-3 file:rounded-[var(--radius-md)] file:border-0 file:text-xs file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
+                />
+                {receiptError && (
+                  <p className="text-xs text-destructive mt-1">{receiptError}</p>
+                )}
+                {receiptFiles.length > 0 && (
+                  <p className="text-xs text-text-secondary mt-1">{receiptFiles.length} image{receiptFiles.length !== 1 ? 's' : ''} selected</p>
+                )}
+              </div>
+            )}
+
             <div className="pb-4">
               <Button
                 onClick={handleSave}
