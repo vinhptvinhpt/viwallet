@@ -8,19 +8,22 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(uuid())
-  email         String        @unique
-  name          String?
-  avatarUrl     String?
-  baseCurrency  String        @default("USD")
-  locale        String        @default("en-US")
-  createdAt     DateTime      @default(now())
-  wallets       Wallet[]
-  categories    Category[]
-  transactions  Transaction[]
-  budgets       Budget[]
-  trips         Trip[]
+  id             String        @id @default(uuid())
+  email          String        @unique
+  name           String?
+  avatarUrl      String?
+  baseCurrency   String        @default("USD")
+  locale         String        @default("en-US")
+  createdAt      DateTime      @default(now())
+  wallets        Wallet[]
+  categories     Category[]
+  transactions   Transaction[]
+  budgets        Budget[]
+  trips          Trip[]
   recurringRules RecurringRule[]
+  transfers      Transfer[]
+  savingsGoals   SavingsGoal[]
+  debts          Debt[]
 }
 
 model Wallet {
@@ -39,6 +42,8 @@ model Wallet {
   createdAt        DateTime      @default(now())
   user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions     Transaction[]
+  transfersFrom    Transfer[]    @relation("TransfersFrom")
+  transfersTo      Transfer[]    @relation("TransfersTo")
 }
 
 enum WalletType {
@@ -149,17 +154,20 @@ model Trip {
 }
 
 model RecurringRule {
-  id             String             @id @default(uuid())
-  userId         String
-  template       Json
-  frequency      RecurringFrequency
-  nextDueDate    DateTime
-  endCondition   EndCondition       @default(NEVER)
-  endValue       String?
-  lastRunAt      DateTime?
-  createdAt      DateTime           @default(now())
-  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions   Transaction[]
+  id                String             @id @default(uuid())
+  userId            String
+  template          Json
+  frequency         RecurringFrequency
+  nextDueDate       DateTime
+  endCondition      EndCondition       @default(NEVER)
+  endValue          String?
+  lastRunAt         DateTime?
+  name              String?
+  isBill            Boolean            @default(false)
+  notifyDaysBefore  Int                @default(1)
+  createdAt         DateTime           @default(now())
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions      Transaction[]
 }
 
 enum RecurringFrequency {
@@ -173,4 +181,87 @@ enum EndCondition {
   NEVER
   AFTER_N
   ON_DATE
+}
+
+model Transfer {
+  id           String   @id @default(uuid())
+  userId       String
+  fromWalletId String
+  toWalletId   String
+  amount       Int
+  toAmount     Int
+  exchangeRate Decimal? @db.Decimal(18, 8)
+  date         DateTime
+  note         String?
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fromWallet   Wallet   @relation("TransfersFrom", fields: [fromWalletId], references: [id])
+  toWallet     Wallet   @relation("TransfersTo", fields: [toWalletId], references: [id])
+}
+
+model SavingsGoal {
+  id            String             @id @default(uuid())
+  userId        String
+  name          String
+  icon          String             @default("target")
+  color         String             @default("#5DD6A8")
+  targetAmount  Int
+  currentAmount Int                @default(0)
+  currency      String
+  deadline      DateTime?
+  status        GoalStatus         @default(ACTIVE)
+  createdAt     DateTime           @default(now())
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contributions GoalContribution[]
+}
+
+model GoalContribution {
+  id       String      @id @default(uuid())
+  goalId   String
+  amount   Int
+  walletId String?
+  date     DateTime
+  note     String?
+  goal     SavingsGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+}
+
+model Debt {
+  id              String        @id @default(uuid())
+  userId          String
+  direction       DebtDirection
+  counterparty    String
+  amount          Int
+  remainingAmount Int
+  currency        String
+  dueDate         DateTime?
+  note            String?
+  status          DebtStatus    @default(OPEN)
+  createdAt       DateTime      @default(now())
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  payments        DebtPayment[]
+}
+
+model DebtPayment {
+  id       String   @id @default(uuid())
+  debtId   String
+  amount   Int
+  walletId String?
+  date     DateTime
+  note     String?
+  debt     Debt     @relation(fields: [debtId], references: [id], onDelete: Cascade)
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+}
+
+enum DebtDirection {
+  I_OWE
+  OWED_TO_ME
+}
+
+enum DebtStatus {
+  OPEN
+  SETTLED
 }
