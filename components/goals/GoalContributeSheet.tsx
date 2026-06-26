@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { AmountInput } from '@/components/shared/AmountInput'
 import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
 import SuccessCheck from '@/components/motion/SuccessCheck'
+import { haptic } from '@/lib/haptics'
 
 interface Wallet {
   id: string
@@ -99,8 +100,13 @@ export function GoalContributeSheet({
       })
       if (res.ok) {
         const data = await res.json()
+        if (data.status === 'COMPLETED') {
+          haptic([10, 40, 10])
+          onCompleted?.()
+        } else {
+          haptic()
+        }
         onSaved()
-        if (data.status === 'COMPLETED') onCompleted?.()
         setSaved(true)
         setTimeout(() => { setSaved(false); onClose() }, 900)
       }

@@ -10,6 +10,7 @@ import SuccessCheck from '@/components/motion/SuccessCheck'
 import PillToggle from '@/components/ui/PillToggle'
 import { createClient } from '@/lib/supabase/client'
 import { validateReceiptFiles } from '@/lib/attachments'
+import { haptic } from '@/lib/haptics'
 import type { Wallet, TransactionWithRelations } from '@/types'
 
 interface TransactionModalProps {
@@ -170,6 +171,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
           }),
         })
         if (res.ok) {
+          haptic()
           setSaved(true)
           setTimeout(() => { setSaved(false); onClose() }, 900)
         }
@@ -211,6 +213,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
                 })
                 if (patchRes.ok) {
                   const updated = await patchRes.json()
+                  haptic()
                   onSave(updated)
                   setSaved(true)
                   setTimeout(() => { setSaved(false); onClose() }, 900)
@@ -223,6 +226,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
           }
         }
 
+        haptic()
         onSave(tx)
         setSaved(true)
         setTimeout(() => { setSaved(false); onClose() }, 900)

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { AmountInput } from '@/components/shared/AmountInput'
 import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
 import SuccessCheck from '@/components/motion/SuccessCheck'
+import { haptic } from '@/lib/haptics'
 
 interface Wallet {
   id: string
@@ -95,6 +96,7 @@ export function DebtPaymentSheet({
         }),
       })
       if (res.ok) {
+        haptic()
         onSuccess()
         setSaved(true)
         setTimeout(() => { setSaved(false); onClose() }, 900)
