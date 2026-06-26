@@ -1,50 +1,113 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { Plus, Plane } from 'lucide-react'
+import { Plus, MapPin } from 'lucide-react'
+import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 import Link from 'next/link'
+import Skeleton from '@/components/ui/Skeleton'
+import Pressable from '@/components/motion/Pressable'
 import type { Trip } from '@/types'
-
-export const dynamic = 'force-dynamic'
 
 export default function TripsPage() {
   const [trips, setTrips] = useState<Trip[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/trips').then(r => r.json()).then(setTrips)
+    fetch('/api/trips')
+      .then(r => r.json())
+      .then(data => {
+        setTrips(data)
+        setLoading(false)
+      })
   }, [])
 
   return (
-    <div className="p-6 max-w-2xl">
+    <div className="p-5 max-w-2xl mx-auto">
+      {/* ── Header ── */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Trips</h1>
-        <Button size="sm"><Plus size={16} className="mr-2" /> New Trip</Button>
+        <h1 className="text-2xl font-bold text-text-primary">Trips</h1>
+        <Button size="sm">
+          <Plus size={16} className="mr-1.5" /> New Trip
+        </Button>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {trips.map(trip => (
-          <Link key={trip.id} href={`/trips/${trip.id}`}>
-            <div className="p-4 rounded-xl bg-surface border border-white/10 hover:border-primary/50 transition-colors cursor-pointer">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Plane size={18} className="text-primary" />
-                </div>
-                <div>
-                  <p className="font-medium">{trip.name}</p>
-                  <p className="text-xs text-slate-400">
-                    {format(new Date(trip.startDate), 'MMM d')}
-                    {trip.endDate ? ` — ${format(new Date(trip.endDate), 'MMM d, yyyy')}` : ' — ongoing'}
-                  </p>
+
+      {/* ── List ── */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-4 space-y-3"
+            >
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-11 h-11 shrink-0" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-3.5 w-28" />
+                  <Skeleton className="h-3 w-20" />
                 </div>
               </div>
-              <p className="text-sm text-slate-400">{trip.baseCurrency}</p>
+              <Skeleton className="h-3 w-12" />
             </div>
-          </Link>
-        ))}
-        {trips.length === 0 && (
-          <p className="col-span-2 text-slate-400 text-center py-12">No trips yet.</p>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : trips.length === 0 ? (
+        <p className="text-text-secondary text-center py-16 text-sm">No trips yet.</p>
+      ) : (
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          initial="hidden"
+          animate="visible"
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.05 } } }}
+        >
+          {trips.map(trip => (
+            <motion.div
+              key={trip.id}
+              variants={{
+                hidden: { opacity: 0, y: 8 },
+                visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
+              }}
+            >
+              <Link href={`/trips/${trip.id}`}>
+                <Pressable
+                  as="div"
+                  className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-4 cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    {trip.coverImage ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={trip.coverImage}
+                        alt={trip.name}
+                        className="w-11 h-11 rounded-[var(--radius-md)] object-cover shrink-0"
+                      />
+                    ) : (
+                      <div
+                        className="w-11 h-11 rounded-[var(--radius-md)] shrink-0 flex items-center justify-center"
+                        style={{ background: 'var(--color-primary-muted)', color: 'var(--color-primary)' }}
+                      >
+                        <MapPin size={20} />
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-semibold text-text-primary truncate">{trip.name}</p>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        {format(new Date(trip.startDate), 'MMM d')}
+                        {trip.endDate
+                          ? ` — ${format(new Date(trip.endDate), 'MMM d, yyyy')}`
+                          : ' — ongoing'}
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-xs font-medium text-text-secondary uppercase tracking-wide">
+                    {trip.baseCurrency}
+                  </p>
+                </Pressable>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </div>
   )
 }
