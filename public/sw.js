@@ -1,12 +1,18 @@
-const CACHE = 'viwallet-v1'
+const CACHE = 'viwallet-v2'
 const OFFLINE_QUEUE = 'offline-queue'
 
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(cache =>
-      cache.addAll(['/', '/dashboard', '/transactions'])
+      cache.addAll(['/', '/dashboard', '/transactions', '/offline.html'])
     )
   )
+})
+
+self.addEventListener('message', e => {
+  if (e.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting()
+  }
 })
 
 self.addEventListener('fetch', e => {
@@ -26,7 +32,13 @@ self.addEventListener('fetch', e => {
   }
 
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request).then(cached => cached || fetch(e.request)).catch(async () => {
+      if (e.request.destination === 'document') {
+        const offlinePage = await caches.match('/offline.html')
+        if (offlinePage) return offlinePage
+      }
+      return new Response('Offline', { status: 503 })
+    })
   )
 })
 
