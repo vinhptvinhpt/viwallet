@@ -16,7 +16,7 @@ export default function PillToggle({
           key={opt.value}
           type="button"
           onClick={() => onChange(opt.value)}
-          className={`flex-1 py-2 text-sm font-medium rounded-[var(--radius-pill)] transition-colors ${
+          className={`flex-1 py-2 text-sm font-medium rounded-[var(--radius-pill)] transition-colors duration-100 active:scale-[0.97] ${
             value === opt.value ? 'bg-hero text-on-hero' : 'text-text-secondary'
           }`}
         >

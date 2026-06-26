@@ -224,22 +224,9 @@ export default function TransactionsPage() {
           subtitle={Object.keys(activeFilters).length > 0 || typeFilter !== 'ALL' ? 'Try adjusting your filters.' : 'Tap + to record your first transaction.'}
         />
       ) : (
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: 0.04 } },
-          }}
-        >
+        <div>
           {Object.entries(grouped).map(([day, txs]) => (
-            <motion.div
-              key={day}
-              variants={{
-                hidden: { opacity: 0, y: 10 },
-                visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
-              }}
-            >
+            <div key={day}>
               <p className="px-5 py-2 text-xs text-text-secondary font-semibold uppercase tracking-wide">
                 {format(new Date(day), 'EEEE, MMM d')}
               </p>
@@ -248,9 +235,9 @@ export default function TransactionsPage() {
                   <TransactionRow key={tx.id} tx={tx} />
                 ))}
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       )}
 
       {/* ── FAB ── */}

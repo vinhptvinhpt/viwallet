@@ -190,4 +190,10 @@
   html {
     font-family: var(--font-sans);
   }
+
+  /* Eliminate 300ms tap delay and grey flash on all interactive elements */
+  button, a, [role="button"], input, select, textarea, label {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
