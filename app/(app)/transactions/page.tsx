@@ -217,7 +217,11 @@ export default function TransactionsPage() {
           ))}
         </div>
       ) : filtered.length === 0 ? (
-        <p className="text-center text-text-secondary py-20 text-sm">No transactions yet.</p>
+        <p className="text-center text-text-secondary py-20 text-sm">
+          {Object.keys(activeFilters).length > 0 || typeFilter !== 'ALL'
+            ? 'No transactions match your filters.'
+            : 'No transactions yet.'}
+        </p>
       ) : (
         <motion.div
           initial="hidden"

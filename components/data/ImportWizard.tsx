@@ -260,6 +260,20 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
                 </span>
               )}
             </div>
+            {parsedRows.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-2 text-text-secondary border border-hairline rounded-[var(--radius-md)]">
+                <XCircle size={32} strokeWidth={1.5} />
+                <p className="text-sm">No valid rows found</p>
+                <p className="text-xs text-text-secondary">Check your column mapping and try again</p>
+              </div>
+            ) : validCount === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 gap-2 text-text-secondary border border-hairline rounded-[var(--radius-md)]">
+                <XCircle size={32} strokeWidth={1.5} />
+                <p className="text-sm">No valid rows — all {invalidCount} rows have errors</p>
+                <p className="text-xs text-text-secondary">Go back and correct your column mapping</p>
+              </div>
+            ) : null}
+            {parsedRows.length > 0 && (
             <div className="overflow-x-auto rounded-[var(--radius-md)] border border-hairline max-h-[36vh] overflow-y-auto">
               <table className="w-full text-xs">
                 <thead className="sticky top-0 bg-surface-2">
@@ -297,6 +311,7 @@ export function ImportWizard({ open, onClose }: ImportWizardProps) {
                 </tbody>
               </table>
             </div>
+            )}
             <div className="flex gap-2 mt-1">
               <Button variant="ghost" onClick={() => setStep(2)} className="flex-1">
                 Back
