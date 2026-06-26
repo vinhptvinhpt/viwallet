@@ -15,14 +15,14 @@ const NAV_ITEMS = [
 export function BottomNav() {
   const pathname = usePathname()
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-white/10 flex z-50">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur border-t border-hairline flex z-50">
       {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
         <Link
           key={href}
           href={href}
           className={cn(
             'flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors',
-            pathname.startsWith(href) ? 'text-primary' : 'text-slate-500'
+            pathname.startsWith(href) ? 'text-primary' : 'text-text-secondary'
           )}
         >
           <Icon size={20} />
