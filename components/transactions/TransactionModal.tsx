@@ -48,6 +48,9 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
 
   const reducedMotion = useAppReducedMotion()
   const panelRef = useRef<HTMLDivElement>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current) }, [])
 
   // 1. Reset shared fields when mode changes to prevent cross-mode data bleed
   useEffect(() => {
@@ -173,7 +176,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
         if (res.ok) {
           haptic()
           setSaved(true)
-          setTimeout(() => { setSaved(false); onClose() }, 900)
+          closeTimerRef.current = setTimeout(() => { setSaved(false); onClose() }, 900)
         }
       } finally {
         setSaving(false)
@@ -216,7 +219,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
                   haptic()
                   onSave(updated)
                   setSaved(true)
-                  setTimeout(() => { setSaved(false); onClose() }, 900)
+                  closeTimerRef.current = setTimeout(() => { setSaved(false); onClose() }, 900)
                   return
                 }
               }

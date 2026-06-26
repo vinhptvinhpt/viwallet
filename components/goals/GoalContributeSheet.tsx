@@ -41,6 +41,9 @@ export function GoalContributeSheet({
 
   const reducedMotion = useAppReducedMotion()
   const panelRef = useRef<HTMLDivElement>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current) }, [])
 
   // Load wallets once
   useEffect(() => {
@@ -108,7 +111,7 @@ export function GoalContributeSheet({
         }
         onSaved()
         setSaved(true)
-        setTimeout(() => { setSaved(false); onClose() }, 900)
+        closeTimerRef.current = setTimeout(() => { setSaved(false); onClose() }, 900)
       }
     } finally {
       setSaving(false)

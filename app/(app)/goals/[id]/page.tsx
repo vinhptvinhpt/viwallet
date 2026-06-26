@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, Plus, History } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -43,6 +43,7 @@ export default function GoalDetailPage() {
   const [loading, setLoading] = useState(true)
   const [showContribute, setShowContribute] = useState(false)
   const [fireConfetti, setFireConfetti] = useState(false)
+  const completedRef = useRef(false)
 
   const loadGoal = useCallback(() => {
     fetch(`/api/goals/${id}`)
@@ -216,9 +217,16 @@ export default function GoalDetailPage() {
 
       <GoalContributeSheet
         open={showContribute}
-        onClose={() => setShowContribute(false)}
+        onClose={() => {
+          setShowContribute(false)
+          if (completedRef.current) {
+            completedRef.current = false
+            // Fire confetti after sheet exit animation completes (~350ms spring)
+            setTimeout(() => { setFireConfetti(true); setTimeout(() => setFireConfetti(false), 1000) }, 400)
+          }
+        }}
         onSaved={loadGoal}
-        onCompleted={() => { setFireConfetti(true); setTimeout(() => setFireConfetti(false), 1000) }}
+        onCompleted={() => { completedRef.current = true }}
         goalId={goal.id}
         goalCurrency={goal.currency}
       />

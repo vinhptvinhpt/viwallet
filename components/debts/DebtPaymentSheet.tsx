@@ -39,6 +39,9 @@ export function DebtPaymentSheet({
 
   const reducedMotion = useAppReducedMotion()
   const panelRef = useRef<HTMLDivElement>(null)
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => { if (closeTimerRef.current) clearTimeout(closeTimerRef.current) }, [])
 
   // Load wallets once
   useEffect(() => {
@@ -99,7 +102,7 @@ export function DebtPaymentSheet({
         haptic()
         onSuccess()
         setSaved(true)
-        setTimeout(() => { setSaved(false); onClose() }, 900)
+        closeTimerRef.current = setTimeout(() => { setSaved(false); onClose() }, 900)
       }
     } catch {
       // network failure — spinner clears via finally

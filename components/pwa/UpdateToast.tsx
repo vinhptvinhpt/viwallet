@@ -7,39 +7,39 @@ export default function UpdateToast() {
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
+    let reg: ServiceWorkerRegistration | undefined
+
+    const updateFoundHandler = () => {
+      const newWorker = reg?.installing
+      if (!newWorker) return
+
+      newWorker.addEventListener('statechange', () => {
+        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+          toast('Update available', {
+            action: {
+              label: 'Reload',
+              onClick: () => {
+                const waiting = reg?.waiting
+                if (waiting) waiting.postMessage({ type: 'SKIP_WAITING' })
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                  window.location.reload()
+                }, { once: true })
+              },
+            },
+          })
+        }
+      })
+    }
+
     navigator.serviceWorker.getRegistration().then((registration) => {
       if (!registration) return
-
-      const updateFoundHandler = () => {
-        const newWorker = registration.installing
-        if (!newWorker) return
-
-        newWorker.addEventListener('statechange', () => {
-          if (
-            newWorker.state === 'installed' &&
-            navigator.serviceWorker.controller
-          ) {
-            toast('Update available', {
-              action: {
-                label: 'Reload',
-                onClick: () => {
-                  const waiting = registration.waiting
-                  if (waiting) {
-                    waiting.postMessage({ type: 'SKIP_WAITING' })
-                  }
-                  navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    window.location.reload()
-                  }, { once: true })
-                },
-              },
-            })
-          }
-        })
-      }
-
-      registration.addEventListener('updatefound', updateFoundHandler)
-      return () => registration.removeEventListener('updatefound', updateFoundHandler)
+      reg = registration
+      reg.addEventListener('updatefound', updateFoundHandler)
     })
+
+    return () => {
+      if (reg) reg.removeEventListener('updatefound', updateFoundHandler)
+    }
   }, [])
 
   return null
