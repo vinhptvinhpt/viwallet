@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { AmountInput } from '@/components/shared/AmountInput'
 import { CategoryPicker } from '@/components/shared/CategoryPicker'
 import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
+import PillToggle from '@/components/ui/PillToggle'
 import type { Wallet, TransactionWithRelations } from '@/types'
 
 interface TransactionModalProps {
@@ -15,8 +16,14 @@ interface TransactionModalProps {
   wallets: Wallet[]
 }
 
+const MODE_OPTIONS = [
+  { label: 'Expense', value: 'EXPENSE' },
+  { label: 'Income', value: 'INCOME' },
+  { label: 'Transfer', value: 'TRANSFER' },
+]
+
 export function TransactionModal({ open, onClose, onSave, wallets }: TransactionModalProps) {
-  const [type, setType] = useState<'EXPENSE' | 'INCOME'>('EXPENSE')
+  const [mode, setMode] = useState<'EXPENSE' | 'INCOME' | 'TRANSFER'>('EXPENSE')
   const [amount, setAmount] = useState(0)
   const [currency, setCurrency] = useState(wallets[0]?.currency ?? 'USD')
   const [walletId, setWalletId] = useState(wallets[0]?.id ?? '')
@@ -25,6 +32,10 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
   const [exchangeRate, setExchangeRate] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+
+  // Transfer-specific state
+  const [fromWalletId, setFromWalletId] = useState(wallets[0]?.id ?? '')
+  const [toWalletId, setToWalletId] = useState(wallets[1]?.id ?? wallets[0]?.id ?? '')
 
   const reducedMotion = useAppReducedMotion()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -81,7 +92,42 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
   const selectedWallet = wallets.find(w => w.id === walletId)
   const showExchangeRate = selectedWallet && selectedWallet.currency !== currency
 
+  // Transfer-specific derived values
+  const fromWallet = wallets.find(w => w.id === fromWalletId)
+  const toWallet = wallets.find(w => w.id === toWalletId)
+  const transferCurrenciesDiffer = !!(fromWallet && toWallet && fromWallet.currency !== toWallet.currency)
+  const toAmount = transferCurrenciesDiffer && exchangeRate
+    ? Math.round(amount * exchangeRate)
+    : amount
+
   async function handleSave() {
+    if (mode === 'TRANSFER') {
+      if (!amount || !fromWalletId || !toWalletId || fromWalletId === toWalletId) return
+      if (transferCurrenciesDiffer && !exchangeRate) return
+      setSaving(true)
+      try {
+        const res = await fetch('/api/transfers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fromWalletId,
+            toWalletId,
+            amount,
+            toAmount,
+            exchangeRate: transferCurrenciesDiffer ? exchangeRate : undefined,
+            date: new Date(date).toISOString(),
+            note: note || undefined,
+          }),
+        })
+        if (res.ok) {
+          onClose()
+        }
+      } finally {
+        setSaving(false)
+      }
+      return
+    }
+
     if (!amount || !categoryId || !walletId) return
     setSaving(true)
     try {
@@ -90,7 +136,7 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          walletId, categoryId, type, amount, currency,
+          walletId, categoryId, type: mode, amount, currency,
           exchangeRate, convertedAmount,
           date: new Date(date).toISOString(),
           note: note || null, photos: [], withPeople: [],
@@ -139,39 +185,81 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
             onDragEnd={(_, info) => { if (info.offset.y > 120) onClose() }}
           >
             <h2 id="tx-modal-title" className="text-base font-semibold text-text-primary mb-4">Add Transaction</h2>
-            <div className="flex gap-2 mb-2">
-              {(['EXPENSE', 'INCOME'] as const).map(t => (
-                <button key={t} onClick={() => setType(t)}
-                  className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    type === t ? 'bg-primary text-white' : 'bg-surface-2 text-text-secondary'
-                  }`}
-                >{t}</button>
-              ))}
+            <div className="mb-4">
+              <PillToggle
+                options={MODE_OPTIONS}
+                value={mode}
+                onChange={v => setMode(v as 'EXPENSE' | 'INCOME' | 'TRANSFER')}
+              />
             </div>
-            <div>
-              <AmountInput value={amount} onChange={setAmount} currency={currency} />
-            </div>
-            {showExchangeRate && (
-              <div className="mt-3">
-                <label className="text-xs text-text-secondary mb-1 block">Exchange Rate (1 {currency} = ? {selectedWallet.currency})</label>
-                <Input
-                  type="number"
-                  placeholder="Enter rate"
-                  onChange={e => setExchangeRate(parseFloat(e.target.value) || null)}
-                  className="bg-surface-2 border-hairline"
-                />
-              </div>
+
+            {mode === 'TRANSFER' ? (
+              <>
+                <div className="mt-3">
+                  <label className="text-xs text-text-secondary mb-1 block">From Wallet</label>
+                  <select value={fromWalletId} onChange={e => setFromWalletId(e.target.value)}
+                    className="w-full bg-surface-2 border border-hairline rounded-lg px-3 py-2 text-sm text-text-primary">
+                    {wallets.map(w => <option key={w.id} value={w.id}>{w.name} ({w.currency})</option>)}
+                  </select>
+                </div>
+                <div className="mt-3">
+                  <label className="text-xs text-text-secondary mb-1 block">To Wallet</label>
+                  <select value={toWalletId} onChange={e => setToWalletId(e.target.value)}
+                    className="w-full bg-surface-2 border border-hairline rounded-lg px-3 py-2 text-sm text-text-primary">
+                    {wallets.map(w => <option key={w.id} value={w.id}>{w.name} ({w.currency})</option>)}
+                  </select>
+                </div>
+                <div className="mt-3">
+                  <AmountInput value={amount} onChange={setAmount} currency={fromWallet?.currency ?? 'USD'} />
+                </div>
+                {transferCurrenciesDiffer && (
+                  <div className="mt-3">
+                    <label className="text-xs text-text-secondary mb-1 block">
+                      Exchange Rate (1 {fromWallet?.currency} = ? {toWallet?.currency})
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="Enter rate"
+                      onChange={e => setExchangeRate(parseFloat(e.target.value) || null)}
+                      className="bg-surface-2 border-hairline"
+                    />
+                    {exchangeRate && (
+                      <p className="text-xs text-text-secondary mt-1">
+                        You will receive {toAmount} {toWallet?.currency}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <div>
+                  <AmountInput value={amount} onChange={setAmount} currency={currency} />
+                </div>
+                {showExchangeRate && (
+                  <div className="mt-3">
+                    <label className="text-xs text-text-secondary mb-1 block">Exchange Rate (1 {currency} = ? {selectedWallet.currency})</label>
+                    <Input
+                      type="number"
+                      placeholder="Enter rate"
+                      onChange={e => setExchangeRate(parseFloat(e.target.value) || null)}
+                      className="bg-surface-2 border-hairline"
+                    />
+                  </div>
+                )}
+                <div className="mt-4">
+                  <CategoryPicker value={categoryId} onChange={setCategoryId} type={mode as 'EXPENSE' | 'INCOME'} />
+                </div>
+                <div className="mt-3">
+                  <label className="text-xs text-text-secondary mb-1 block">Wallet</label>
+                  <select value={walletId} onChange={e => setWalletId(e.target.value)}
+                    className="w-full bg-surface-2 border border-hairline rounded-lg px-3 py-2 text-sm text-text-primary">
+                    {wallets.map(w => <option key={w.id} value={w.id}>{w.name} ({w.currency})</option>)}
+                  </select>
+                </div>
+              </>
             )}
-            <div className="mt-4">
-              <CategoryPicker value={categoryId} onChange={setCategoryId} type={type} />
-            </div>
-            <div className="mt-3">
-              <label className="text-xs text-text-secondary mb-1 block">Wallet</label>
-              <select value={walletId} onChange={e => setWalletId(e.target.value)}
-                className="w-full bg-surface-2 border border-hairline rounded-lg px-3 py-2 text-sm text-text-primary">
-                {wallets.map(w => <option key={w.id} value={w.id}>{w.name} ({w.currency})</option>)}
-              </select>
-            </div>
+
             <div className="mt-3">
               <Input type="date" value={date} onChange={e => setDate(e.target.value)}
                 className="bg-surface-2 border-hairline text-text-primary" />
@@ -181,8 +269,18 @@ export function TransactionModal({ open, onClose, onSave, wallets }: Transaction
                 className="bg-surface-2 border-hairline" />
             </div>
             <div className="pb-4">
-              <Button onClick={handleSave} disabled={saving || !amount || !categoryId} className="w-full mt-4">
-                {saving ? 'Saving...' : 'Save Transaction'}
+              <Button
+                onClick={handleSave}
+                disabled={
+                  saving ||
+                  !amount ||
+                  (mode === 'TRANSFER'
+                    ? !fromWalletId || !toWalletId || fromWalletId === toWalletId || (transferCurrenciesDiffer && !exchangeRate)
+                    : !categoryId)
+                }
+                className="w-full mt-4"
+              >
+                {saving ? 'Saving...' : mode === 'TRANSFER' ? 'Transfer' : 'Save Transaction'}
               </Button>
             </div>
           </motion.div>
