@@ -1,6 +1,7 @@
 'use client'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { formatAmount } from '@/lib/currency'
+import { getCategoryIcon } from '@/components/shared/categoryIcon'
 
 interface SpendingDonutProps {
   data: { name: string; icon: string; color: string; amount: number }[]
@@ -68,7 +69,10 @@ export function SpendingDonut({ data, currency }: SpendingDonutProps) {
                 className="w-2.5 h-2.5 rounded-full shrink-0"
                 style={{ background: sliceFill(entry, i) }}
               />
-              <span className="text-xs text-on-hero/70">{entry.icon} {entry.name}</span>
+              <span className="text-xs text-on-hero/70 flex items-center gap-1">
+                {(() => { const Ic = getCategoryIcon(entry.icon); return <Ic size={14} /> })()}
+                {entry.name}
+              </span>
             </div>
             <span className="text-xs font-medium text-on-hero">
               {formatAmount(entry.amount, currency)}

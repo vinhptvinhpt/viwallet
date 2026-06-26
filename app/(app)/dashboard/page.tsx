@@ -6,7 +6,8 @@ import { SpendingDonut } from '@/components/reports/SpendingDonut'
 import { startOfMonth, endOfMonth } from 'date-fns'
 import AnimatedNumber from '@/components/motion/AnimatedNumber'
 import Skeleton from '@/components/ui/Skeleton'
-import { categoryTint } from '@/components/shared/categoryTint'
+import IconTile from '@/components/shared/IconTile'
+import { getCategoryIcon } from '@/components/shared/categoryIcon'
 import type { Wallet, BudgetWithSpent, TransactionWithRelations } from '@/types'
 
 interface ReportSummary {
@@ -187,7 +188,6 @@ export default function DashboardPage() {
             >
               {transactions.map((tx) => {
                 const isIncome = tx.type === 'INCOME'
-                const { bg, fg } = categoryTint(tx.category.color ?? '')
                 return (
                   <motion.li
                     key={tx.id}
@@ -198,14 +198,7 @@ export default function DashboardPage() {
                     className="flex items-center justify-between py-3 px-4"
                   >
                     <div className="flex items-center gap-3">
-                      {/* Icon tile using the category's tint color */}
-                      <div
-                        className="w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center shrink-0 text-lg"
-                        style={{ background: bg, color: fg }}
-                        aria-hidden="true"
-                      >
-                        {tx.category.icon}
-                      </div>
+                      <IconTile icon={getCategoryIcon(tx.category.icon)} color={tx.category.color} size={40} />
                       <div>
                         <p className="text-sm font-medium text-text-primary">{tx.category.name}</p>
                         <p className="text-xs text-text-secondary">{tx.note || tx.wallet.name}</p>
