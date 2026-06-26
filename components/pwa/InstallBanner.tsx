@@ -12,6 +12,7 @@ const DISMISSED_KEY = 'viwallet:install-dismissed'
 export default function InstallBanner() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [visible, setVisible] = useState(false)
+  const [prompting, setPrompting] = useState(false)
 
   useEffect(() => {
     // Don't show if already dismissed or running in standalone mode
@@ -35,12 +36,14 @@ export default function InstallBanner() {
   if (!visible || !deferredPrompt) return null
 
   const handleInstall = async () => {
+    setPrompting(true)
     await deferredPrompt.prompt()
     const { outcome } = await deferredPrompt.userChoice
     if (outcome === 'accepted' || outcome === 'dismissed') {
       setVisible(false)
       setDeferredPrompt(null)
     }
+    setPrompting(false)
   }
 
   const handleDismiss = () => {
@@ -60,7 +63,8 @@ export default function InstallBanner() {
       <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={handleInstall}
-          className="bg-primary text-white text-sm font-medium px-3 py-1.5 rounded-[var(--radius-pill)] hover:opacity-90 transition-opacity"
+          disabled={prompting}
+          className="bg-primary text-white text-sm font-medium px-3 py-1.5 rounded-[var(--radius-pill)] hover:opacity-90 transition-opacity disabled:opacity-50"
         >
           Install
         </button>

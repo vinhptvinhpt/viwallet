@@ -10,7 +10,7 @@ export default function UpdateToast() {
     navigator.serviceWorker.getRegistration().then((registration) => {
       if (!registration) return
 
-      registration.addEventListener('updatefound', () => {
+      const updateFoundHandler = () => {
         const newWorker = registration.installing
         if (!newWorker) return
 
@@ -29,13 +29,16 @@ export default function UpdateToast() {
                   }
                   navigator.serviceWorker.addEventListener('controllerchange', () => {
                     window.location.reload()
-                  })
+                  }, { once: true })
                 },
               },
             })
           }
         })
-      })
+      }
+
+      registration.addEventListener('updatefound', updateFoundHandler)
+      return () => registration.removeEventListener('updatefound', updateFoundHandler)
     })
   }, [])
 
