@@ -1,37 +1,33 @@
-'use client'
+﻿'use client'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, List, Target, Plane, MoreHorizontal, Goal, CreditCard, BarChart2, Settings, Users } from 'lucide-react'
-import { motion, AnimatePresence } from 'motion/react'
-import { useState, useEffect, useRef } from 'react'
+import { Home, List, Target, Plane, BarChart2, Settings, MoreHorizontal, Goal, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Home' },
   { href: '/transactions', icon: List, label: 'Transactions' },
-  { href: '/split', icon: Users, label: 'Split' },
+  { href: '/split', icon: Users, label: 'Split & Debts' },
   { href: '/budgets', icon: Target, label: 'Budgets' },
 ]
 
 const MORE_ITEMS = [
   { href: '/trips', icon: Plane, label: 'Trips' },
   { href: '/goals', icon: Goal, label: 'Goals' },
-  { href: '/debts', icon: CreditCard, label: '1-on-1 Debts' },
   { href: '/reports', icon: BarChart2, label: 'Reports' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
 
 function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const reducedMotion = useAppReducedMotion()
   const moreSheetRef = useRef<HTMLDivElement>(null)
+  const reducedMotion = useReducedMotion()
 
-  // Focus management
   useEffect(() => {
     if (open) moreSheetRef.current?.focus()
   }, [open])
 
-  // Escape-to-close
   useEffect(() => {
     if (!open) return
     function handleKeyDown(e: KeyboardEvent) {
@@ -41,7 +37,6 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [open, onClose])
 
-  // Body scroll lock
   useEffect(() => {
     if (!open) return
     document.body.style.overflow = 'hidden'
@@ -82,6 +77,7 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
                 <Link
                   key={href}
                   href={href}
+                  prefetch={true}
                   onClick={onClose}
                   className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-[var(--radius-md)] bg-surface-2 hover:bg-primary/10 transition-colors text-text-secondary"
                 >
@@ -102,7 +98,6 @@ export function BottomNav() {
   const [activeHref, setActiveHref] = useState(pathname)
   const [moreOpen, setMoreOpen] = useState(false)
 
-  // Keep in sync with pathname
   useEffect(() => {
     setActiveHref(pathname)
     setMoreOpen(false)
@@ -120,6 +115,7 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
+              prefetch={true}
               onClick={() => setActiveHref(href)}
               className={cn(
                 'flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-all duration-150 active:scale-95',
