@@ -121,7 +121,7 @@ export default async function SplitHubPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-2.5">
-            {groups.map((group) => (
+            {groups.map((group: any) => (
               <GroupCard
                 key={group.id}
                 id={group.id}
