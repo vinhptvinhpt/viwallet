@@ -8,22 +8,26 @@ datasource db {
 }
 
 model User {
-  id             String        @id @default(uuid())
-  email          String        @unique
-  name           String?
-  avatarUrl      String?
-  baseCurrency   String        @default("USD")
-  locale         String        @default("en-US")
-  createdAt      DateTime      @default(now())
-  wallets        Wallet[]
-  categories     Category[]
-  transactions   Transaction[]
-  budgets        Budget[]
-  trips          Trip[]
-  recurringRules RecurringRule[]
-  transfers      Transfer[]
-  savingsGoals   SavingsGoal[]
-  debts          Debt[]
+  id                  String          @id @default(uuid())
+  email               String          @unique
+  name                String?
+  avatarUrl           String?
+  baseCurrency        String          @default("USD")
+  locale              String          @default("en-US")
+  createdAt           DateTime        @default(now())
+  wallets             Wallet[]
+  categories          Category[]
+  transactions        Transaction[]
+  budgets             Budget[]
+  trips               Trip[]
+  recurringRules      RecurringRule[]
+  transfers           Transfer[]
+  savingsGoals        SavingsGoal[]
+  debts               Debt[]
+  createdSplitGroups  SplitGroup[]    @relation("CreatedSplitGroups")
+  groupMemberships    GroupMember[]
+  createdExpenses     GroupExpense[]
+  recordedSettlements Settlement[]
 }
 
 model Wallet {
@@ -264,4 +268,134 @@ enum DebtDirection {
 enum DebtStatus {
   OPEN
   SETTLED
+}
+
+// ----------------------------------------------------
+// Evensteven Group Cost-Sharing Models
+// ----------------------------------------------------
+
+enum SplitMode {
+  EQUAL
+  PERCENTAGE
+  SHARES
+  EXACT
+}
+
+enum GroupMemberRole {
+  ADMIN
+  MEMBER
+}
+
+enum ActivityAction {
+  GROUP_CREATED
+  MEMBER_JOINED
+  EXPENSE_CREATED
+  EXPENSE_UPDATED
+  EXPENSE_DELETED
+  SETTLEMENT_RECORDED
+}
+
+model SplitGroup {
+  id           String         @id @default(uuid())
+  name         String
+  currency     String         @default("USD")
+  inviteToken  String         @unique @default(uuid())
+  createdById  String
+  createdAt    DateTime       @default(now())
+  archivedAt   DateTime?
+  createdBy    User           @relation("CreatedSplitGroups", fields: [createdById], references: [id])
+  members      GroupMember[]
+  expenses     GroupExpense[]
+  settlements  Settlement[]
+  activityLogs ActivityLog[]
+
+  @@index([createdById])
+  @@index([inviteToken])
+}
+
+model GroupMember {
+  id               String          @id @default(uuid())
+  groupId          String
+  userId           String?
+  displayName      String
+  role             GroupMemberRole @default(MEMBER)
+  joinedAt         DateTime        @default(now())
+  group            SplitGroup      @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user             User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  paidExpenses     GroupExpense[]  @relation("ExpensePayer")
+  expenseShares    ExpenseShare[]
+  paidSettlements  Settlement[]    @relation("SettlementPayer")
+  recvdSettlements Settlement[]    @relation("SettlementPayee")
+  activityLogs     ActivityLog[]
+
+  @@unique([groupId, userId])
+  @@index([groupId])
+  @@index([userId])
+}
+
+model GroupExpense {
+  id             String         @id @default(uuid())
+  groupId        String
+  paidByMemberId String
+  amount         Int            // integer minor units (cents)
+  description    String
+  splitMode      SplitMode      @default(EQUAL)
+  expenseDate    DateTime
+  createdById    String
+  deletedAt      DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  group          SplitGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  paidByMember   GroupMember    @relation("ExpensePayer", fields: [paidByMemberId], references: [id])
+  createdBy      User           @relation(fields: [createdById], references: [id])
+  shares         ExpenseShare[]
+
+  @@index([groupId, deletedAt])
+  @@index([paidByMemberId])
+}
+
+model ExpenseShare {
+  id            String       @id @default(uuid())
+  expenseId     String
+  memberId      String
+  shareAmount   Int          // integer minor units (cents)
+  rawSplitValue String?
+  createdAt     DateTime     @default(now())
+  expense       GroupExpense @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  member        GroupMember  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([expenseId])
+  @@index([memberId])
+}
+
+model Settlement {
+  id             String      @id @default(uuid())
+  groupId        String
+  payerMemberId  String
+  payeeMemberId  String
+  amount         Int         // integer minor units (cents)
+  settlementDate DateTime
+  note           String?
+  recordedById   String
+  createdAt      DateTime    @default(now())
+  group          SplitGroup  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  payerMember    GroupMember @relation("SettlementPayer", fields: [payerMemberId], references: [id])
+  payeeMember    GroupMember @relation("SettlementPayee", fields: [payeeMemberId], references: [id])
+  recordedBy     User        @relation(fields: [recordedById], references: [id])
+
+  @@index([groupId])
+}
+
+model ActivityLog {
+  id            String         @id @default(uuid())
+  groupId       String
+  actorMemberId String?
+  actionType    ActivityAction
+  entityId      String
+  detailsJson   String         // Structured JSON diff
+  createdAt     DateTime       @default(now())
+  group         SplitGroup     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  actorMember   GroupMember?   @relation(fields: [actorMemberId], references: [id], onDelete: SetNull)
+
+  @@index([groupId, createdAt(sort: Desc)])
 }

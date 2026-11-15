@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, List, Target, Plane, MoreHorizontal, Goal, CreditCard, BarChart2, Settings } from 'lucide-react'
+import { Home, List, Target, Plane, MoreHorizontal, Goal, CreditCard, BarChart2, Settings, Users } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
@@ -10,13 +10,14 @@ import { useAppReducedMotion } from '@/components/motion/useReducedMotion'
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Home' },
   { href: '/transactions', icon: List, label: 'Transactions' },
+  { href: '/split', icon: Users, label: 'Split' },
   { href: '/budgets', icon: Target, label: 'Budgets' },
-  { href: '/trips', icon: Plane, label: 'Trips' },
 ]
 
 const MORE_ITEMS = [
+  { href: '/trips', icon: Plane, label: 'Trips' },
   { href: '/goals', icon: Goal, label: 'Goals' },
-  { href: '/debts', icon: CreditCard, label: 'Debts' },
+  { href: '/debts', icon: CreditCard, label: '1-on-1 Debts' },
   { href: '/reports', icon: BarChart2, label: 'Reports' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
@@ -117,7 +118,7 @@ export function BottomNav() {
             href={href}
             className={cn(
               'flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors',
-              pathname.startsWith(href) ? 'text-primary' : 'text-text-secondary'
+              pathname.startsWith(href) ? 'text-primary font-semibold' : 'text-text-secondary'
             )}
           >
             <Icon size={20} />
@@ -128,7 +129,7 @@ export function BottomNav() {
           onClick={() => setMoreOpen(prev => !prev)}
           className={cn(
             'flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors',
-            isMoreActive || moreOpen ? 'text-primary' : 'text-text-secondary'
+            isMoreActive || moreOpen ? 'text-primary font-semibold' : 'text-text-secondary'
           )}
         >
           <MoreHorizontal size={20} />

@@ -1,17 +1,17 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, List, Target, Plane, BarChart2, Settings, Goal, CreditCard } from 'lucide-react'
+import { Home, List, Target, Plane, BarChart2, Settings, Goal, Users } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import ThemeToggle from '@/components/theme/ThemeToggle'
 
 const NAV_ITEMS = [
   { href: '/dashboard', icon: Home, label: 'Dashboard' },
   { href: '/transactions', icon: List, label: 'Transactions' },
+  { href: '/split', icon: Users, label: 'Split & Debts' },
   { href: '/budgets', icon: Target, label: 'Budgets' },
   { href: '/trips', icon: Plane, label: 'Trips' },
   { href: '/goals', icon: Goal, label: 'Goals' },
-  { href: '/debts', icon: CreditCard, label: 'Debts' },
   { href: '/reports', icon: BarChart2, label: 'Reports' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ]
@@ -31,8 +31,8 @@ export function Sidebar() {
             className={cn(
               'flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] text-sm font-medium transition-colors',
               pathname.startsWith(href)
-                ? 'bg-primary text-white'
-                : 'text-text-secondary hover:bg-surface-2'
+                ? 'bg-primary text-white font-semibold shadow-sm'
+                : 'text-text-secondary hover:bg-surface-2 hover:text-text-primary'
             )}
           >
             <Icon size={18} />
