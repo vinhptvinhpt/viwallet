@@ -1,115 +1,47 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { Plus, CreditCard } from 'lucide-react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { BudgetCard } from '@/components/budgets/BudgetCard'
-import { BudgetModal } from '@/components/budgets/BudgetModal'
-import { Button } from '@/components/ui/button'
-import Skeleton from '@/components/ui/Skeleton'
-import EmptyState from '@/components/shared/EmptyState'
-import type { BudgetWithSpent, Budget } from '@/types'
+import { redirect } from 'next/navigation'
+import { startOfMonth, endOfMonth } from 'date-fns'
+import { getUser } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import { BudgetsView } from '@/components/budgets/BudgetsView'
 
-function BudgetCardSkeleton() {
-  return (
-    <div className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Skeleton className="w-9 h-9 rounded-[var(--radius-md)]" />
-          <Skeleton className="h-4 w-28" />
-        </div>
-        <Skeleton className="h-5 w-10 rounded-full" />
-      </div>
-      <Skeleton className="h-2 w-full rounded-full" />
-      <div className="flex justify-between">
-        <Skeleton className="h-3 w-20" />
-        <Skeleton className="h-3 w-16" />
-      </div>
-    </div>
-  )
-}
-
-export default function BudgetsPage() {
-  const [budgets, setBudgets] = useState<BudgetWithSpent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [showModal, setShowModal] = useState(false)
-
-  useEffect(() => {
-    fetch('/api/budgets')
-      .then(r => r.json())
-      .then(data => {
-        setBudgets(data)
-        setLoading(false)
-      })
-  }, [])
-
-  function handleSave(budget: Budget) {
-    // Optimistically add with spent=0; next fetch will have real data
-    setBudgets(prev => [...prev, { ...budget, spent: 0, category: null }])
+export default async function BudgetsPage() {
+  const user = await getUser()
+  if (!user) {
+    redirect('/login')
   }
 
-  const envelopes = budgets.filter(b => b.type === 'ENVELOPE')
-  const limits = budgets.filter(b => b.type === 'LIMIT')
+  const now = new Date()
+  const monthStart = startOfMonth(now)
+  const monthEnd = endOfMonth(now)
+
+  const [rawBudgets, monthExpenses] = await Promise.all([
+    prisma.budget.findMany({
+      where: { userId: user.id },
+      include: { category: { select: { id: true, name: true, icon: true, color: true } } },
+    }),
+    prisma.transaction.findMany({
+      where: {
+        userId: user.id,
+        type: 'EXPENSE',
+        date: { gte: monthStart, lte: monthEnd },
+      },
+      select: {
+        categoryId: true,
+        convertedAmount: true,
+      },
+    }),
+  ])
+
+  const budgetsWithSpent = rawBudgets.map(budget => {
+    const spent = monthExpenses
+      .filter(t => !budget.categoryId || t.categoryId === budget.categoryId)
+      .reduce((sum, t) => sum + t.convertedAmount, 0)
+    return { ...budget, spent }
+  })
 
   return (
-    <div className="p-5 max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-text-primary">Budgets</h1>
-        <Button size="sm" onClick={() => setShowModal(true)}>
-          <Plus size={16} className="mr-2" /> Add Budget
-        </Button>
-      </div>
-
-      <Tabs defaultValue="limits">
-        <TabsList className="bg-surface-2 mb-4">
-          <TabsTrigger value="limits">Spending Limits</TabsTrigger>
-          <TabsTrigger value="envelopes">Envelopes</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="limits">
-          <div className="flex flex-col gap-3">
-            {loading ? (
-              <>
-                <BudgetCardSkeleton />
-                <BudgetCardSkeleton />
-                <BudgetCardSkeleton />
-              </>
-            ) : limits.length === 0 ? (
-              <EmptyState
-                icon={CreditCard}
-                title="No spending limits yet"
-                subtitle="Set a limit to track spending by category."
-                actionLabel="Add Budget"
-                onAction={() => setShowModal(true)}
-              />
-            ) : (
-              limits.map(b => <BudgetCard key={b.id} budget={b} />)
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="envelopes">
-          <div className="flex flex-col gap-3">
-            {loading ? (
-              <>
-                <BudgetCardSkeleton />
-                <BudgetCardSkeleton />
-              </>
-            ) : envelopes.length === 0 ? (
-              <EmptyState
-                icon={CreditCard}
-                title="No envelopes yet"
-                subtitle="Envelope budgets let you allocate money per category."
-                actionLabel="Add Budget"
-                onAction={() => setShowModal(true)}
-              />
-            ) : (
-              envelopes.map(b => <BudgetCard key={b.id} budget={b} />)
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
-
-      <BudgetModal open={showModal} onClose={() => setShowModal(false)} onSave={handleSave} />
-    </div>
+    <BudgetsView
+      initialBudgets={JSON.parse(JSON.stringify(budgetsWithSpent))}
+    />
   )
 }

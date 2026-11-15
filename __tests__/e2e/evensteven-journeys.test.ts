@@ -383,9 +383,10 @@ describe('Evensteven Vertical Slice — End-to-End Journeys & Acceptance Scenari
       // Step 2: Bob resolves invite link and claims placeholder
       const inviteData = await getGroupByInviteToken(group.inviteToken, db)
       expect(inviteData.success).toBe(true)
-      expect(inviteData.group.name).toBe('Ski Trip 2026')
-      expect(inviteData.group.unclaimedMembers.length).toBe(1)
-      const placeholderBob = inviteData.group.unclaimedMembers[0]
+      expect(inviteData.group).toBeDefined()
+      expect(inviteData.group!.name).toBe('Ski Trip 2026')
+      expect(inviteData.group!.unclaimedMembers.length).toBe(1)
+      const placeholderBob = inviteData.group!.unclaimedMembers[0]!
 
       const joinRes = await joinGroupByInvite('user-bob', group.inviteToken, placeholderBob.id, db)
       expect(joinRes.success).toBe(true)

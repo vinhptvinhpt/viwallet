@@ -1,0 +1,109 @@
+'use client'
+import { useState } from 'react'
+import { Plus, CreditCard } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { BudgetCard } from '@/components/budgets/BudgetCard'
+import { BudgetModal } from '@/components/budgets/BudgetModal'
+import { Button } from '@/components/ui/button'
+import Skeleton from '@/components/ui/Skeleton'
+import EmptyState from '@/components/shared/EmptyState'
+import type { BudgetWithSpent, Budget } from '@/types'
+
+function BudgetCardSkeleton() {
+  return (
+    <div className="bg-surface rounded-[var(--radius-lg)] shadow-[var(--shadow-card)] p-4 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Skeleton className="w-9 h-9 rounded-[var(--radius-md)]" />
+          <Skeleton className="h-4 w-28" />
+        </div>
+        <Skeleton className="h-5 w-10 rounded-full" />
+      </div>
+      <Skeleton className="h-2 w-full rounded-full" />
+      <div className="flex justify-between">
+        <Skeleton className="h-3 w-20" />
+        <Skeleton className="h-3 w-16" />
+      </div>
+    </div>
+  )
+}
+
+export interface BudgetsViewProps {
+  initialBudgets: BudgetWithSpent[]
+}
+
+export function BudgetsView({ initialBudgets }: BudgetsViewProps) {
+  const [budgets, setBudgets] = useState<BudgetWithSpent[]>(initialBudgets)
+  const [loading] = useState(false) // Render immediately with 0ms skeleton delay!
+  const [showModal, setShowModal] = useState(false)
+
+  function handleSave(budget: Budget) {
+    setBudgets(prev => [...prev, { ...budget, spent: 0, category: null }])
+  }
+
+  const envelopes = budgets.filter(b => b.type === 'ENVELOPE')
+  const limits = budgets.filter(b => b.type === 'LIMIT')
+
+  return (
+    <div className="p-5 max-w-2xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-text-primary">Budgets</h1>
+        <Button size="sm" onClick={() => setShowModal(true)}>
+          <Plus size={16} className="mr-2" /> Add Budget
+        </Button>
+      </div>
+
+      <Tabs defaultValue="limits">
+        <TabsList className="bg-surface-2 mb-4">
+          <TabsTrigger value="limits">Spending Limits</TabsTrigger>
+          <TabsTrigger value="envelopes">Envelopes</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="limits">
+          <div className="flex flex-col gap-3">
+            {loading ? (
+              <>
+                <BudgetCardSkeleton />
+                <BudgetCardSkeleton />
+                <BudgetCardSkeleton />
+              </>
+            ) : limits.length === 0 ? (
+              <EmptyState
+                icon={CreditCard}
+                title="No spending limits yet"
+                subtitle="Set a limit to track spending by category."
+                actionLabel="Add Budget"
+                onAction={() => setShowModal(true)}
+              />
+            ) : (
+              limits.map(b => <BudgetCard key={b.id} budget={b} />)
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="envelopes">
+          <div className="flex flex-col gap-3">
+            {loading ? (
+              <>
+                <BudgetCardSkeleton />
+                <BudgetCardSkeleton />
+              </>
+            ) : envelopes.length === 0 ? (
+              <EmptyState
+                icon={CreditCard}
+                title="No envelopes yet"
+                subtitle="Envelope budgets let you allocate money per category."
+                actionLabel="Add Budget"
+                onAction={() => setShowModal(true)}
+              />
+            ) : (
+              envelopes.map(b => <BudgetCard key={b.id} budget={b} />)
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      <BudgetModal open={showModal} onClose={() => setShowModal(false)} onSave={handleSave} />
+    </div>
+  )
+}
