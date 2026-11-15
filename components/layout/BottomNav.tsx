@@ -99,32 +99,38 @@ function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 export function BottomNav() {
   const pathname = usePathname()
+  const [activeHref, setActiveHref] = useState(pathname)
   const [moreOpen, setMoreOpen] = useState(false)
 
-  // Close "More" sheet when navigating
+  // Keep in sync with pathname
   useEffect(() => {
+    setActiveHref(pathname)
     setMoreOpen(false)
   }, [pathname])
 
-  const isMoreActive = MORE_ITEMS.some(item => pathname.startsWith(item.href))
+  const isMoreActive = MORE_ITEMS.some(item => activeHref.startsWith(item.href))
 
   return (
     <>
       <MoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} />
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur border-t border-hairline flex z-50">
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              'flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors',
-              pathname.startsWith(href) ? 'text-primary font-semibold' : 'text-text-secondary'
-            )}
-          >
-            <Icon size={20} />
-            {label}
-          </Link>
-        ))}
+        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
+          const isSelected = activeHref === href || (href !== '/dashboard' && activeHref.startsWith(href))
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => setActiveHref(href)}
+              className={cn(
+                'flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-all duration-150 active:scale-95',
+                isSelected ? 'text-primary font-semibold' : 'text-text-secondary'
+              )}
+            >
+              <Icon size={20} />
+              {label}
+            </Link>
+          )
+        })}
         <button
           onClick={() => setMoreOpen(prev => !prev)}
           className={cn(

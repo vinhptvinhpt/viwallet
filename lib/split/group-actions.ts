@@ -277,22 +277,44 @@ export async function getUserSplitGroups(userId: string, db: any = defaultDb) {
   try {
     const memberships = await db.groupMember.findMany({
       where: { userId },
-      include: {
+      select: {
+        id: true,
+        role: true,
         group: {
-          include: {
-            members: true,
+          select: {
+            id: true,
+            name: true,
+            currency: true,
+            archivedAt: true,
+            members: {
+              select: { id: true },
+            },
             expenses: {
               where: { deletedAt: null },
-              include: { shares: true },
+              select: {
+                id: true,
+                paidByMemberId: true,
+                amount: true,
+                shares: {
+                  select: { memberId: true, shareAmount: true },
+                },
+              },
             },
-            settlements: true,
+            settlements: {
+              select: {
+                id: true,
+                payerMemberId: true,
+                payeeMemberId: true,
+                amount: true,
+              },
+            },
           },
         },
       },
     })
 
     const groupsWithBalances = memberships
-      .filter((m: any) => !m.group.archivedAt)
+      .filter((m: any) => m.group && !m.group.archivedAt)
       .map((m: any) => {
         const group = m.group
         const memberIds = group.members.map((mem: any) => mem.id)

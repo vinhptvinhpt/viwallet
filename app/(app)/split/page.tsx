@@ -12,13 +12,22 @@ export default async function SplitHubPage() {
   const user = await getUser()
   if (!user) redirect('/login')
 
-  const groupsResult = await getUserSplitGroups(user.id)
-  const groups = groupsResult.success && groupsResult.groups ? groupsResult.groups : []
+  // Fetch groups and 1-on-1 debts concurrently to eliminate blocking delay
+  const [groupsResult, debts] = await Promise.all([
+    getUserSplitGroups(user.id),
+    prisma.debt.findMany({
+      where: { userId: user.id },
+      select: {
+        id: true,
+        direction: true,
+        status: true,
+        remainingAmount: true,
+        currency: true,
+      },
+    }),
+  ])
 
-  // Fetch 1-on-1 personal debts
-  const debts = await prisma.debt.findMany({
-    where: { userId: user.id },
-  })
+  const groups = groupsResult.success && groupsResult.groups ? groupsResult.groups : []
 
   const iOweDebts = debts.filter((d) => d.direction === 'I_OWE' && d.status === 'OPEN')
   const owedToMeDebts = debts.filter((d) => d.direction === 'OWED_TO_ME' && d.status === 'OPEN')

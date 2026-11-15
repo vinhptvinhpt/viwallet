@@ -1,7 +1,8 @@
+import { cache } from 'react'
 import { createServerSupabaseClient } from './supabase/server'
 import { prisma } from './prisma'
 
-export async function getUser() {
+export const getUser = cache(async () => {
   const supabase = await createServerSupabaseClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -16,4 +17,4 @@ export async function getUser() {
       avatarUrl: user.user_metadata?.avatar_url ?? null,
     },
   })
-}
+})
